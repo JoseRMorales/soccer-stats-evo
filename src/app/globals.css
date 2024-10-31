@@ -17,13 +17,3 @@ body {
 
   font-family: Arial, Helvetica, sans-serif;
 }
-
-/* .playerCardMask {
-  -webkit-mask-image: url(/card_clip.png);
-  mask-image: url(/card_clip.png);
-  mask-repeat: no-repeat;
-} */
-
-.card-clip {
-  clip-path: polygon(100% 23.95%, 100% 100%, 0% 100%, 0.28% 23.95%, 50.25% 0%);
-}
