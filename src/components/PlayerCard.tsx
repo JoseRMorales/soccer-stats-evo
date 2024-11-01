@@ -1,10 +1,10 @@
 const PlayerCard = ({ x, y }: { x: number; y: number }) => {
-  const scale = 0.5
+  const backgroundImage = '/defaultAvatar.png'
 
   return (
     <div
       className={
-        'absolute cursor-pointer transform translate-x-[-50%] translate-y-[-50%] scale-[30%] sm:scale-50'
+        'absolute cursor-pointer transform translate-x-[-50%] translate-y-[-50%] scale-[30%] sm:scale-50 hover:scale-[35%] sm:hover:scale-[55%] transition-transform duration-300 ease-in-out'
       }
       style={{
         left: `${x}%`,
@@ -23,55 +23,26 @@ const PlayerCard = ({ x, y }: { x: number; y: number }) => {
         </svg>
         <div id="card-inner">
           <div id="card-top">
-            <div className="info">
-              <div className="value">94</div>
-              <div className="position">st</div>
-              <div className="country">
-                <div></div>
-              </div>
-              <div className="club">
-                <div></div>
-              </div>
-            </div>
-            <div className="image"></div>
-            <div className="backfont">FUT19</div>
+            <div
+              className="image"
+              style={{
+                backgroundImage: `url(${backgroundImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
+            ></div>
           </div>
           <div id="card-bottom">
-            <div className="name">ronaldo</div>
-            <div className="stats">
-              <div>
-                <ul>
-                  <li>
-                    <span>89</span>
-                    <span>pac</span>
-                  </li>
-                  <li>
-                    <span>94</span>
-                    <span>sho</span>
-                  </li>
-                  <li>
-                    <span>81</span>
-                    <span>pas</span>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <ul>
-                  <li>
-                    <span>90</span>
-                    <span>dri</span>
-                  </li>
-                  <li>
-                    <span>33</span>
-                    <span>def</span>
-                  </li>
-                  <li>
-                    <span>83</span>
-                    <span>phy</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
+            <div className="name">John Doe</div>
+            <dl className="stats grid grid-cols-[repeat(2,auto)] gap-x-2 w-max mb-12 mx-auto text-4xl uppercase">
+              <dt>games</dt>
+              <dd className="text-right">100</dd>
+              <dt>goals</dt>
+              <dd className="text-right">50</dd>
+              <dt>assists</dt>
+              <dd className="text-right">25</dd>
+            </dl>
           </div>
         </div>
       </div>

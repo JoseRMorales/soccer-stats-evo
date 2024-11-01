@@ -37,7 +37,7 @@ const SoccerField = () => {
   return (
     <div className="relative m-4">
       <img
-        src="/field_v3.svg"
+        src="/field.svg"
         className="invert w-[600px]"
         alt="Soccer Field"
         // Mask image linear gradient
