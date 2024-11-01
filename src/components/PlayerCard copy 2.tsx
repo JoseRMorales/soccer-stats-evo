@@ -1,19 +1,11 @@
 const PlayerCard = ({ x, y }: { x: number; y: number }) => {
-  const scale = 0.5
-
   return (
     <div
-      className={
-        'absolute cursor-pointer transform translate-x-[-50%] translate-y-[-50%] scale-[30%] sm:scale-50'
-      }
-      style={{
-        left: `${x}%`,
-        top: `${y}%`,
-        transformOrigin: 'center'
-      }}
+      className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+      style={{ left: `${x}%`, top: `${y}%` }}
     >
       <div id="card" className="active">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 270 430">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 267.3 427.3">
           <clipPath id="svgPath">
             <path
               fill="#000"
@@ -33,6 +25,7 @@ const PlayerCard = ({ x, y }: { x: number; y: number }) => {
                 <div></div>
               </div>
             </div>
+
             <div className="image"></div>
             <div className="backfont">FUT19</div>
           </div>

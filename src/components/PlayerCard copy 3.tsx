@@ -3,12 +3,11 @@ const PlayerCard = ({ x, y }: { x: number; y: number }) => {
 
   return (
     <div
-      className={
-        'absolute cursor-pointer transform translate-x-[-50%] translate-y-[-50%] scale-[30%] sm:scale-50'
-      }
+      className="absolute cursor-pointer"
       style={{
         left: `${x}%`,
         top: `${y}%`,
+        transform: `translate(-50%, -50%) scale(${scale})`,
         transformOrigin: 'center'
       }}
     >
