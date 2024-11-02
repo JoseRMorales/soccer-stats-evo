@@ -1,13 +1,13 @@
+import GameStats from '@/components/GameStats'
 import PlayerCard from '@/components/PlayerCard'
 import SoccerField from '@/components/SoccerField'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-
 export default function Home () {
   return (
     <div className="flex flex-col 2xl:flex-row justify-between 2xl:justify-center">
       {/* Game stats section */}
-      <aside className="flex flex-col justify-center items-center 2:xlh-screen h:fit min-w-52 bg-blue-300">
-        <p>Stats</p>
+      <aside className="flex flex-col justify-center items-center 2:xlh-screen h:fit min-w-5">
+        <GameStats />
       </aside>
       {/* Lineup section */}
       <main className="flex flex-col 2xl:flex-row justify-between w-full 2xl:w-fit">
