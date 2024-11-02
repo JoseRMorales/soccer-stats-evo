@@ -1,17 +1,31 @@
-const PlayerCard = ({ x, y }: { x: number; y: number }) => {
+const PlayerCard = ({
+  x = 0,
+  y = 0,
+  starter = true
+}: {
+  x?: number
+  y?: number
+  starter?: boolean
+}) => {
   const backgroundImage = '/defaultAvatar.png'
 
-  return (
-    <div
-      className={
-        'absolute cursor-pointer transform translate-x-[-50%] translate-y-[-50%] scale-[30%] sm:scale-50 hover:scale-[35%] sm:hover:scale-[55%] transition-transform duration-300 ease-in-out'
-      }
-      style={{
+  const styleObject = starter
+    ? {
         left: `${x}%`,
         top: `${y}%`,
         transformOrigin: 'center'
-      }}
-    >
+      }
+    : {}
+
+  const commonClasses =
+    'cursor-pointer transition-transform duration-300 ease-in-out'
+
+  const classes = starter
+    ? `absolute transform translate-x-[-50%] translate-y-[-50%] ${commonClasses} scale-[30%] sm:scale-50 hover:scale-[35%] sm:hover:scale-[55%]`
+    : `${commonClasses} scale-[50%] sm:scale-[70%] hover:scale-[55%] sm:hover:scale-[75%]`
+
+  return (
+    <div className={classes} style={styleObject}>
       <div id="card" className="active">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 270 430">
           <clipPath id="svgPath">

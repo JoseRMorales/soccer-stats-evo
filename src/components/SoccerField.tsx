@@ -2,7 +2,7 @@ import PlayerCard from '@/components/PlayerCard'
 import lineups from '@/lib/lineups'
 import React from 'react'
 
-const positions = lineups['2-3-1']
+const positions = lineups['3-2-1']
 
 const SoccerField = () => {
   return (

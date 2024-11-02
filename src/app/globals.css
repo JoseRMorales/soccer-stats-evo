@@ -2,17 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground: #ffffff;
-  --background: #171717;
+@layer base {
+  :root {
+    --background: 24 9.8% 10%;
+    --background-gradient: 134, 65%, 19%;
+    --foreground: 0 0% 95%;
+    --card: 24 9.8% 10%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 142.1 70.6% 45.3%;
+    --primary-foreground: 144.9 80.4% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 85.7% 97.3%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 142.4 71.8% 29.2%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
 }
+
 body {
-  color: var(--foreground);
-  background: rgb(41, 41, 46);
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
   background: linear-gradient(
     0deg,
-    rgba(41, 41, 46, 1) 57%,
-    rgba(17, 80, 32, 1) 100%
+    hsl(var(--background)) 80%,
+    hsl(var(--background-gradient)) 100%
   );
+
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
