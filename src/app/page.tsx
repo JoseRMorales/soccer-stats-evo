@@ -1,5 +1,6 @@
 import PlayerCard from '@/components/PlayerCard'
 import SoccerField from '@/components/SoccerField'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 export default function Home () {
   return (
@@ -15,14 +16,28 @@ export default function Home () {
           <SoccerField />
         </section>
         {/* Bench section */}
-        <aside className="flex flex-row 2xl:flex-col items-center 2xl:h-screen 2xl:max-h-full h-fit  2xl:overflow-y-scroll 2xl:overflow-x-hidden overflow-x-auto overflow-y-auto">
-          <PlayerCard starter={false} />
-          <PlayerCard starter={false} />
-          <PlayerCard starter={false} />
-          <PlayerCard starter={false} />
-          <PlayerCard starter={false} />
-          <PlayerCard starter={false} />
-          <PlayerCard starter={false} />
+        <aside className="">
+          <ScrollArea className="hidden 2xl:flex flex-col items-center h-screen max-h-full">
+            <PlayerCard starter={false} />
+            <PlayerCard starter={false} />
+            <PlayerCard starter={false} />
+            <PlayerCard starter={false} />
+            <PlayerCard starter={false} />
+            <PlayerCard starter={false} />
+            <PlayerCard starter={false} />
+          </ScrollArea>
+          <ScrollArea className="">
+            <div className="flex flex-row 2xl:hidden h-fit">
+              <PlayerCard starter={false} />
+              <PlayerCard starter={false} />
+              <PlayerCard starter={false} />
+              <PlayerCard starter={false} />
+              <PlayerCard starter={false} />
+              <PlayerCard starter={false} />
+              <PlayerCard starter={false} />
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         </aside>
       </main>
     </div>
