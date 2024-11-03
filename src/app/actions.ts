@@ -147,3 +147,35 @@ export const getMatchRedCards = async (season: string, round: number) => {
 
   return data
 }
+
+export const getMatchLineup = async (season: string, round: number) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_match_lineup', {
+    input_round: round,
+    input_season: season
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
+
+export const getPlayerInfo = async (season: string, playerNumber: number) => {
+  const client = await createClient()
+  const { data, error } = await client
+    .from('Players')
+    .select('name')
+    .eq('season', season)
+    .eq('number', playerNumber)
+    .single()
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}

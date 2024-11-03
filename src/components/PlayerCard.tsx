@@ -1,11 +1,15 @@
-const PlayerCard = ({
+import { PlayerCardInfo } from '@/types/types'
+
+const PlayerCard = async ({
   x = 0,
   y = 0,
-  starter = true
+  starter = true,
+  playerCardInfo
 }: {
   x?: number
   y?: number
   starter?: boolean
+  playerCardInfo: PlayerCardInfo
 }) => {
   const backgroundImage = '/defaultAvatar.png'
 
@@ -48,7 +52,9 @@ const PlayerCard = ({
             ></div>
           </div>
           <div id="card-bottom">
-            <div className="name">John Doe</div>
+            <div className="name">
+              {playerCardInfo.number} - {playerCardInfo.name}
+            </div>
             <dl className="stats grid grid-cols-[repeat(2,auto)] gap-x-2 w-max mb-12 mx-auto text-4xl uppercase">
               <dt>games</dt>
               <dd className="text-right">100</dd>

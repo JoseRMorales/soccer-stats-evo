@@ -1,9 +1,11 @@
 import {
   getMatchAssists,
+  getMatchLineup,
   getMatchRedCards,
   getMatchScorers,
   getMatchTeams,
-  getMatchYellowCards
+  getMatchYellowCards,
+  getPlayerInfo
 } from '@/app/actions'
 import GameStats from '@/components/GameStats'
 import PlayerCard from '@/components/PlayerCard'
@@ -22,6 +24,24 @@ const GamePage = async ({
   const assists = await getMatchAssists(season, Number(round))
   const yellowCards = await getMatchYellowCards(season, Number(round))
   const redCards = await getMatchRedCards(season, Number(round))
+  const lineup = await getMatchLineup(season, Number(round))
+
+  const players = await Promise.all(
+    lineup.map(async (player) => {
+      const playerInfo = await getPlayerInfo(season, player.player_number)
+      return {
+        ...player,
+        starter: player.player_position !== -1,
+        playerCardInfo: {
+          ...playerInfo,
+          number: player.player_number
+        }
+      }
+    })
+  )
+
+  const starters = players.filter((player) => player.starter)
+  const bench = players.filter((player) => !player.starter)
 
   return (
     <div className="flex flex-col 2xl:flex-row justify-between 2xl:justify-center">
@@ -42,28 +62,30 @@ const GamePage = async ({
       <main className="flex flex-col 2xl:flex-row justify-between w-full 2xl:w-fit">
         {/* Starters section */}
         <section className="flex justify-center items-center 2xl:h-screen h-fit py-4 w-full 2xl:px-16">
-          <SoccerField />
+          <SoccerField starters={starters} />
         </section>
         {/* Bench section */}
         <aside className="">
+          {/* Widescreen */}
           <ScrollArea className="hidden 2xl:flex flex-col items-center h-screen max-h-full">
-            <PlayerCard starter={false} />
-            <PlayerCard starter={false} />
-            <PlayerCard starter={false} />
-            <PlayerCard starter={false} />
-            <PlayerCard starter={false} />
-            <PlayerCard starter={false} />
-            <PlayerCard starter={false} />
+            {bench.map((player) => (
+              <PlayerCard
+                key={player.player_number}
+                starter={player.starter}
+                playerCardInfo={player.playerCardInfo}
+              />
+            ))}
           </ScrollArea>
+          {/* Mobile */}
           <ScrollArea className="">
             <div className="flex flex-row 2xl:hidden h-fit">
-              <PlayerCard starter={false} />
-              <PlayerCard starter={false} />
-              <PlayerCard starter={false} />
-              <PlayerCard starter={false} />
-              <PlayerCard starter={false} />
-              <PlayerCard starter={false} />
-              <PlayerCard starter={false} />
+              {bench.map((player) => (
+                <PlayerCard
+                  key={player.player_number}
+                  starter={player.starter}
+                  playerCardInfo={player.playerCardInfo}
+                />
+              ))}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>

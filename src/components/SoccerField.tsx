@@ -1,10 +1,17 @@
 import PlayerCard from '@/components/PlayerCard'
 import lineups from '@/lib/lineups'
-import React from 'react'
+import { PlayerCardInfo } from '@/types/types'
 
 const positions = lineups['3-2-1']
 
-const SoccerField = () => {
+interface Starters {
+  player_number: number
+  player_position: number
+  starter: boolean
+  playerCardInfo: PlayerCardInfo
+}
+
+const SoccerField = ({ starters }: { starters: Starters[] }) => {
   return (
     <div className="relative m-4">
       <img
@@ -15,9 +22,19 @@ const SoccerField = () => {
         style={{ maskImage: 'linear-gradient(to top, black 80%, transparent)' }}
       />
 
-      {positions.map((position, index) => (
-        <PlayerCard key={index} x={position.x} y={position.y} />
-      ))}
+      {starters.map((player) => {
+        const index = player.player_position - 1
+        const { x, y } = positions[index]
+        return (
+          <PlayerCard
+            key={player.player_number}
+            x={x}
+            y={y}
+            starter={player.starter}
+            playerCardInfo={player.playerCardInfo}
+          />
+        )
+      })}
     </div>
   )
 }
