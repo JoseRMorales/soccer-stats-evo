@@ -397,7 +397,45 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_match_assists: {
+        Args: {
+          input_season: string
+          input_round: number
+        }
+        Returns: {
+          player_name: string
+          assists_amount: number
+        }[]
+      }
+      get_match_red_cards: {
+        Args: {
+          input_season: string
+          input_round: number
+        }
+        Returns: {
+          player_name: string
+        }[]
+      }
+      get_match_scorers: {
+        Args: {
+          input_season: string
+          input_round: number
+        }
+        Returns: {
+          player_name: string
+          goals_amount: number
+        }[]
+      }
+      get_match_yellow_cards: {
+        Args: {
+          input_season: string
+          input_round: number
+        }
+        Returns: {
+          player_name: string
+          cards_amount: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -1,4 +1,10 @@
-import { matchTeams } from '@/app/actions'
+import {
+  getMatchAssists,
+  getMatchRedCards,
+  getMatchScorers,
+  getMatchTeams,
+  getMatchYellowCards
+} from '@/app/actions'
 import GameStats from '@/components/GameStats'
 import PlayerCard from '@/components/PlayerCard'
 import SoccerField from '@/components/SoccerField'
@@ -10,16 +16,27 @@ const GamePage = async ({
   params: Promise<{ season: string; round: string }>
 }) => {
   const { season, round } = await params
-  const { ownerTeam, opponentTeam } = await matchTeams(season, Number(round))
-
-  console.log(season, round)
-  console.log(ownerTeam, opponentTeam)
+  const { ownerTeam, opponentTeam, scoredGoals, concededGoals } =
+    await getMatchTeams(season, Number(round))
+  const scorers = await getMatchScorers(season, Number(round))
+  const assists = await getMatchAssists(season, Number(round))
+  const yellowCards = await getMatchYellowCards(season, Number(round))
+  const redCards = await getMatchRedCards(season, Number(round))
 
   return (
     <div className="flex flex-col 2xl:flex-row justify-between 2xl:justify-center">
       {/* Game stats section */}
       <aside className="flex flex-col justify-center items-center 2:xlh-screen h:fit min-w-5">
-        <GameStats ownerTeam={ownerTeam} opponentTeam={opponentTeam} />
+        <GameStats
+          ownerTeam={ownerTeam}
+          opponentTeam={opponentTeam}
+          scoredGoals={scoredGoals}
+          concededGoals={concededGoals}
+          scorers={scorers}
+          assists={assists}
+          yellowCards={yellowCards}
+          redCards={redCards}
+        />
       </aside>
       {/* Lineup section */}
       <main className="flex flex-col 2xl:flex-row justify-between w-full 2xl:w-fit">

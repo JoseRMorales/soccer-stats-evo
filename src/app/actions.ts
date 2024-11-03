@@ -41,7 +41,7 @@ export const goToCurrentRound = async () => {
   redirect(`/${season}/${match?.round}`)
 }
 
-export const matchTeams = async (season: string, round: number) => {
+export const getMatchTeams = async (season: string, round: number) => {
   const client = await createClient()
   const { data, error } = await client
     .from('Teams')
@@ -58,7 +58,15 @@ export const matchTeams = async (season: string, round: number) => {
 
   const { data: matchesData, error: matchesError } = await client
     .from('Matches')
-    .select('...Teams!inner(name)')
+    .select(
+      `
+    goals_scored,
+    goals_conceded,
+    ...Teams!inner(
+      name
+    )
+    `
+    )
     .eq('season', season)
     .eq('round', round)
     .single()
@@ -69,9 +77,73 @@ export const matchTeams = async (season: string, round: number) => {
   }
 
   const opponentTeam = matchesData?.name
+  const scoredGoals = matchesData?.goals_scored
+  const concededGoals = matchesData?.goals_conceded
 
   return {
     ownerTeam,
-    opponentTeam
+    opponentTeam,
+    scoredGoals,
+    concededGoals
   }
+}
+
+export const getMatchScorers = async (season: string, round: number) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_match_scorers', {
+    input_round: round,
+    input_season: season
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
+
+export const getMatchAssists = async (season: string, round: number) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_match_assists', {
+    input_round: round,
+    input_season: season
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
+
+export const getMatchYellowCards = async (season: string, round: number) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_match_yellow_cards', {
+    input_round: round,
+    input_season: season
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
+
+export const getMatchRedCards = async (season: string, round: number) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_match_red_cards', {
+    input_round: round,
+    input_season: season
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
 }
