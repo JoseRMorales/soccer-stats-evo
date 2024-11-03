@@ -1,8 +1,18 @@
-const GameStats = () => {
+const GameStats = ({
+  ownerTeam,
+  opponentTeam
+}: {
+  ownerTeam: string
+  opponentTeam: string
+}) => {
   return (
     <div className="flex flex-col text-center space-y-6">
       <div className="text-4xl font-bold uppercase">
-        <h1>Team Blue - Team Red</h1>
+        {
+          <h1>
+            {ownerTeam} - {opponentTeam}
+          </h1>
+        }
         <br />
         <h2>3 - 0</h2>
       </div>

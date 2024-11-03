@@ -342,14 +342,17 @@ export type Database = {
         Row: {
           id: string
           name: string
+          owner: boolean
         }
         Insert: {
           id?: string
           name: string
+          owner: boolean
         }
         Update: {
           id?: string
           name?: string
+          owner?: boolean
         }
         Relationships: []
       }

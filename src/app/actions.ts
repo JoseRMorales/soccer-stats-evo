@@ -40,3 +40,38 @@ export const goToCurrentRound = async () => {
 
   redirect(`/${season}/${match?.round}`)
 }
+
+export const matchTeams = async (season: string, round: number) => {
+  const client = await createClient()
+  const { data, error } = await client
+    .from('Teams')
+    .select('name')
+    .eq('owner', true)
+    .single()
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  const ownerTeam = data?.name
+
+  const { data: matchesData, error: matchesError } = await client
+    .from('Matches')
+    .select('...Teams!inner(name)')
+    .eq('season', season)
+    .eq('round', round)
+    .single()
+
+  if (matchesError) {
+    console.error(matchesError)
+    throw new APIError(matchesError.message)
+  }
+
+  const opponentTeam = matchesData?.name
+
+  return {
+    ownerTeam,
+    opponentTeam
+  }
+}
