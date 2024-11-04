@@ -30,19 +30,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "Assists_player_season_fkey"
-            columns: ["player", "season"]
+            foreignKeyName: 'Assists_player_season_fkey'
+            columns: ['player', 'season']
             isOneToOne: false
-            referencedRelation: "Players"
-            referencedColumns: ["number", "season"]
+            referencedRelation: 'Players'
+            referencedColumns: ['number', 'season']
           },
           {
-            foreignKeyName: "Assists_season_round_fkey"
-            columns: ["season", "round"]
+            foreignKeyName: 'Assists_season_round_fkey'
+            columns: ['season', 'round']
             isOneToOne: false
-            referencedRelation: "Matches"
-            referencedColumns: ["season", "round"]
-          },
+            referencedRelation: 'Matches'
+            referencedColumns: ['season', 'round']
+          }
         ]
       }
       Goals: {
@@ -69,19 +69,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "Goals_player_season_fkey"
-            columns: ["player", "season"]
+            foreignKeyName: 'Goals_player_season_fkey'
+            columns: ['player', 'season']
             isOneToOne: false
-            referencedRelation: "Players"
-            referencedColumns: ["number", "season"]
+            referencedRelation: 'Players'
+            referencedColumns: ['number', 'season']
           },
           {
-            foreignKeyName: "Goals_season_round_fkey"
-            columns: ["season", "round"]
+            foreignKeyName: 'Goals_season_round_fkey'
+            columns: ['season', 'round']
             isOneToOne: false
-            referencedRelation: "Matches"
-            referencedColumns: ["season", "round"]
-          },
+            referencedRelation: 'Matches'
+            referencedColumns: ['season', 'round']
+          }
         ]
       }
       Lineups: {
@@ -105,19 +105,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "Lineups_player_season_fkey"
-            columns: ["player", "season"]
+            foreignKeyName: 'Lineups_player_season_fkey'
+            columns: ['player', 'season']
             isOneToOne: false
-            referencedRelation: "Players"
-            referencedColumns: ["number", "season"]
+            referencedRelation: 'Players'
+            referencedColumns: ['number', 'season']
           },
           {
-            foreignKeyName: "Lineups_season_round_fkey"
-            columns: ["season", "round"]
+            foreignKeyName: 'Lineups_season_round_fkey'
+            columns: ['season', 'round']
             isOneToOne: false
-            referencedRelation: "Matches"
-            referencedColumns: ["season", "round"]
-          },
+            referencedRelation: 'Matches'
+            referencedColumns: ['season', 'round']
+          }
         ]
       }
       Matches: {
@@ -156,33 +156,33 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "Matches_mvp_season_fkey"
-            columns: ["mvp", "season"]
+            foreignKeyName: 'Matches_mvp_season_fkey'
+            columns: ['mvp', 'season']
             isOneToOne: false
-            referencedRelation: "Players"
-            referencedColumns: ["number", "season"]
+            referencedRelation: 'Players'
+            referencedColumns: ['number', 'season']
           },
           {
-            foreignKeyName: "Matches_opponent_fkey"
-            columns: ["opponent"]
+            foreignKeyName: 'Matches_opponent_fkey'
+            columns: ['opponent']
             isOneToOne: false
-            referencedRelation: "Teams"
-            referencedColumns: ["id"]
+            referencedRelation: 'Teams'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "Matches_season_fkey"
-            columns: ["season"]
+            foreignKeyName: 'Matches_season_fkey'
+            columns: ['season']
             isOneToOne: false
-            referencedRelation: "Seasons"
-            referencedColumns: ["id"]
+            referencedRelation: 'Seasons'
+            referencedColumns: ['id']
           },
           {
-            foreignKeyName: "Matches_season_fkey1"
-            columns: ["season"]
+            foreignKeyName: 'Matches_season_fkey1'
+            columns: ['season']
             isOneToOne: false
-            referencedRelation: "Seasons"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'Seasons'
+            referencedColumns: ['id']
+          }
         ]
       }
       MVPVotes: {
@@ -209,26 +209,65 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "MVPVotes_player_voted_season_fkey"
-            columns: ["player_voted", "season"]
+            foreignKeyName: 'MVPVotes_player_voted_season_fkey'
+            columns: ['player_voted', 'season']
             isOneToOne: false
-            referencedRelation: "Players"
-            referencedColumns: ["number", "season"]
+            referencedRelation: 'Players'
+            referencedColumns: ['number', 'season']
           },
           {
-            foreignKeyName: "MVPVotes_season_round_fkey"
-            columns: ["season", "round"]
+            foreignKeyName: 'MVPVotes_season_round_fkey'
+            columns: ['season', 'round']
             isOneToOne: false
-            referencedRelation: "Matches"
-            referencedColumns: ["season", "round"]
+            referencedRelation: 'Matches'
+            referencedColumns: ['season', 'round']
           },
           {
-            foreignKeyName: "MVPVotes_voter_season_fkey"
-            columns: ["voter", "season"]
+            foreignKeyName: 'MVPVotes_voter_season_fkey'
+            columns: ['voter', 'season']
             isOneToOne: false
-            referencedRelation: "Players"
-            referencedColumns: ["number", "season"]
+            referencedRelation: 'Players'
+            referencedColumns: ['number', 'season']
+          }
+        ]
+      }
+      PenaltiesAgainst: {
+        Row: {
+          amount: number
+          player: number
+          round: number
+          saved: number
+          season: string
+        }
+        Insert: {
+          amount?: number
+          player: number
+          round: number
+          saved?: number
+          season: string
+        }
+        Update: {
+          amount?: number
+          player?: number
+          round?: number
+          saved?: number
+          season?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'SavedPenalties_player_season_fkey'
+            columns: ['player', 'season']
+            isOneToOne: false
+            referencedRelation: 'Players'
+            referencedColumns: ['number', 'season']
           },
+          {
+            foreignKeyName: 'SavedPenalties_season_round_fkey'
+            columns: ['season', 'round']
+            isOneToOne: false
+            referencedRelation: 'Matches'
+            referencedColumns: ['season', 'round']
+          }
         ]
       }
       Players: {
@@ -249,12 +288,12 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "Players_season_fkey"
-            columns: ["season"]
+            foreignKeyName: 'Players_season_fkey'
+            columns: ['season']
             isOneToOne: false
-            referencedRelation: "Seasons"
-            referencedColumns: ["id"]
-          },
+            referencedRelation: 'Seasons'
+            referencedColumns: ['id']
+          }
         ]
       }
       RedCards: {
@@ -275,55 +314,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "RedCards_player_season_fkey"
-            columns: ["player", "season"]
+            foreignKeyName: 'RedCards_player_season_fkey'
+            columns: ['player', 'season']
             isOneToOne: false
-            referencedRelation: "Players"
-            referencedColumns: ["number", "season"]
+            referencedRelation: 'Players'
+            referencedColumns: ['number', 'season']
           },
           {
-            foreignKeyName: "RedCards_season_round_fkey"
-            columns: ["season", "round"]
+            foreignKeyName: 'RedCards_season_round_fkey'
+            columns: ['season', 'round']
             isOneToOne: false
-            referencedRelation: "Matches"
-            referencedColumns: ["season", "round"]
-          },
-        ]
-      }
-      SavedPenalties: {
-        Row: {
-          amount: number
-          player: number
-          round: number
-          season: string
-        }
-        Insert: {
-          amount?: number
-          player: number
-          round: number
-          season: string
-        }
-        Update: {
-          amount?: number
-          player?: number
-          round?: number
-          season?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "SavedPenalties_player_season_fkey"
-            columns: ["player", "season"]
-            isOneToOne: false
-            referencedRelation: "Players"
-            referencedColumns: ["number", "season"]
-          },
-          {
-            foreignKeyName: "SavedPenalties_season_round_fkey"
-            columns: ["season", "round"]
-            isOneToOne: false
-            referencedRelation: "Matches"
-            referencedColumns: ["season", "round"]
-          },
+            referencedRelation: 'Matches'
+            referencedColumns: ['season', 'round']
+          }
         ]
       }
       Seasons: {
@@ -377,19 +380,19 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "YellowCards_player_season_fkey"
-            columns: ["player", "season"]
+            foreignKeyName: 'YellowCards_player_season_fkey'
+            columns: ['player', 'season']
             isOneToOne: false
-            referencedRelation: "Players"
-            referencedColumns: ["number", "season"]
+            referencedRelation: 'Players'
+            referencedColumns: ['number', 'season']
           },
           {
-            foreignKeyName: "YellowCards_season_round_fkey"
-            columns: ["season", "round"]
+            foreignKeyName: 'YellowCards_season_round_fkey'
+            columns: ['season', 'round']
             isOneToOne: false
-            referencedRelation: "Matches"
-            referencedColumns: ["season", "round"]
-          },
+            referencedRelation: 'Matches'
+            referencedColumns: ['season', 'round']
+          }
         ]
       }
     }
@@ -397,6 +400,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_assists_number: {
+        Args: {
+          input_season: string
+          input_player: number
+        }
+        Returns: {
+          assists: number
+        }[]
+      }
+      get_goals_number: {
+        Args: {
+          input_season: string
+          input_player: number
+        }
+        Returns: {
+          goals: number
+        }[]
+      }
       get_match_assists: {
         Args: {
           input_season: string
@@ -446,6 +467,43 @@ export type Database = {
           cards_amount: number
         }[]
       }
+      get_penalties_saved: {
+        Args: {
+          input_season: string
+          input_player: number
+        }
+        Returns: {
+          saved_penalties: number
+          total_penalties: number
+        }[]
+      }
+      get_played_games: {
+        Args: {
+          input_season: string
+          input_player: number
+        }
+        Returns: {
+          played_matches: number
+        }[]
+      }
+      get_red_cards_number: {
+        Args: {
+          input_season: string
+          input_player: number
+        }
+        Returns: {
+          red_cards: number
+        }[]
+      }
+      get_yellow_cards_number: {
+        Args: {
+          input_season: string
+          input_player: number
+        }
+        Returns: {
+          yellow_cards: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
@@ -456,27 +514,27 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type PublicSchema = Database[Extract<keyof Database, 'public'>]
 
 export type Tables<
   PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | keyof (PublicSchema['Tables'] & PublicSchema['Views'])
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    ? keyof (Database[PublicTableNameOrOptions['schema']]['Tables'] &
+        Database[PublicTableNameOrOptions['schema']]['Views'])
+    : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+  ? (Database[PublicTableNameOrOptions['schema']]['Tables'] &
+      Database[PublicTableNameOrOptions['schema']]['Views'])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof (PublicSchema['Tables'] &
+        PublicSchema['Views'])
+    ? (PublicSchema['Tables'] &
+        PublicSchema['Views'])[PublicTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -485,19 +543,19 @@ export type Tables<
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+    | keyof PublicSchema['Tables']
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
+    : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
+    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -506,19 +564,19 @@ export type TablesInsert<
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+    | keyof PublicSchema['Tables']
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
+    : never = never
 > = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
+    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -527,28 +585,28 @@ export type TablesUpdate<
 
 export type Enums<
   PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+    | keyof PublicSchema['Enums']
     | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    ? keyof Database[PublicEnumNameOrOptions['schema']]['Enums']
+    : never = never
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+  ? Database[PublicEnumNameOrOptions['schema']]['Enums'][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema['Enums']
+    ? PublicSchema['Enums'][PublicEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
+    | keyof PublicSchema['CompositeTypes']
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    ? keyof Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+    : never = never
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  ? Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema['CompositeTypes']
+    ? PublicSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
     : never

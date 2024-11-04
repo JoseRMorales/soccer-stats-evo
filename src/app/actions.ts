@@ -196,3 +196,108 @@ export const getNextRound = async (season: string, round: number) => {
 
   return data ? round + 1 : null
 }
+
+export const getPlayedMatches = async (
+  season: string,
+  playerNumber: number
+) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_played_games', {
+    input_season: season,
+    input_player: playerNumber
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
+
+export const getGoalsNumber = async (season: string, playerNumber: number) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_goals_number', {
+    input_season: season,
+    input_player: playerNumber
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
+
+export const getAssistsNumber = async (
+  season: string,
+  playerNumber: number
+) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_assists_number', {
+    input_season: season,
+    input_player: playerNumber
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
+
+export const getYellowCardsNumber = async (
+  season: string,
+  playerNumber: number
+) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_yellow_cards_number', {
+    input_season: season,
+    input_player: playerNumber
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
+
+export const getRedCardsNumber = async (
+  season: string,
+  playerNumber: number
+) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_red_cards_number', {
+    input_season: season,
+    input_player: playerNumber
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
+
+export const getPenaltiesSaved = async (
+  season: string,
+  playerNumber: number
+) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_penalties_saved', {
+    input_season: season,
+    input_player: playerNumber
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
