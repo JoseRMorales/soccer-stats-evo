@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { Database } from '@/types/database.types'
 import {
   IconBallFootball,
@@ -44,63 +46,53 @@ const GameStats = ({
           {scoredGoals} - {concededGoals}
         </h2>
       </div>
-      <div className="flex flex-col text-center text-xl">
+      <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl p-4">
         {scorers.map((scorer) => (
-          <div
-            key={scorer.player_name}
-            className="flex items-center justify-center space-x-2"
-          >
-            <IconBallFootball size={24} stroke={2} />
-            <span>{scorer.player_name}</span>
-            {
-              <span>
-                {scorer.goals_amount > 1 ? `x${scorer.goals_amount}` : ''}
-              </span>
-            }
-          </div>
+          <React.Fragment key={scorer.player_name}>
+            <dt>
+              <IconBallFootball size={24} stroke={2} />
+            </dt>
+            <dd className="text-right">
+              <span>{scorer.player_name}</span>
+              {
+                <span>
+                  {scorer.goals_amount > 1 ? `x${scorer.goals_amount}` : ''}
+                </span>
+              }
+            </dd>
+          </React.Fragment>
         ))}
-      </div>
-      <div className="flex flex-col text-center text-xl">
+      </dl>
+      <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl">
         {assists.map((assist) => (
-          <div
-            key={assist.player_name}
-            className="flex items-center justify-center space-x-2"
-          >
-            <IconShoe size={24} stroke={2} />
-            <span>{assist.player_name}</span>
-            {
-              <span>
-                {assist.assists_amount > 1 ? `x${assist.assists_amount}` : ''}
-              </span>
-            }
-          </div>
+          <React.Fragment key={assist.player_name}>
+            <dt>
+              <IconShoe size={24} stroke={2} />
+            </dt>
+            <dd className="text-right">{assist.player_name}</dd>
+          </React.Fragment>
         ))}
-      </div>
-      <div className="flex flex-col text-center text-xl">
+      </dl>
+      <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl">
         {yellowCards.map((yellowCard) => (
-          <div
-            key={yellowCard.player_name}
-            className="flex items-center justify-center space-x-2"
-          >
-            <IconCardsFilled size={24} stroke={2} color="yellow" />
-            <span>{yellowCard.player_name}</span>
-            <span>
-              {yellowCard.cards_amount > 1 ? `x${yellowCard.cards_amount}` : ''}
-            </span>
-          </div>
+          <React.Fragment key={yellowCard.player_name}>
+            <dt>
+              <IconCardsFilled size={24} stroke={2} color="yellow" />
+            </dt>
+            <dd className="text-right">{yellowCard.player_name}</dd>
+          </React.Fragment>
         ))}
-      </div>
-      <div className="flex flex-col text-center text-xl">
+      </dl>
+      <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl">
         {redCards.map((redCard) => (
-          <div
-            key={redCard.player_name}
-            className="flex items-center justify-center space-x-2"
-          >
-            <IconCardsFilled size={24} stroke={2} color="red" />
-            <span>{redCard.player_name}</span>
-          </div>
+          <React.Fragment key={redCard.player_name}>
+            <dt>
+              <IconCardsFilled size={24} stroke={2} color="red" />
+            </dt>
+            <dd className="text-right">{redCard.player_name}</dd>
+          </React.Fragment>
         ))}
-      </div>
+      </dl>
     </div>
   )
 }

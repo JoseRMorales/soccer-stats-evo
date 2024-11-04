@@ -179,3 +179,20 @@ export const getPlayerInfo = async (season: string, playerNumber: number) => {
 
   return data
 }
+
+export const getNextRound = async (season: string, round: number) => {
+  const client = await createClient()
+  const { data, error } = await client
+    .from('Matches')
+    .select('round')
+    .eq('round', round + 1)
+    .eq('season', season)
+    .maybeSingle()
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data ? round + 1 : null
+}
