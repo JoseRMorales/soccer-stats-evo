@@ -36,10 +36,12 @@ const GameStats = ({
   redCards: redCardsResponse
 }) => {
   return (
-    <div className="flex flex-col text-center space-y-6">
-      <div className="text-4xl font-bold uppercase">
-        <h1>
-          {ownerTeam} - {opponentTeam}
+    <div className="flex flex-col text-center space-y-6 max-w-md overflow-hidden">
+      <div className="text-4xl font-bold uppercase break-words">
+        <h1 className="flex flex-col">
+          <span>{ownerTeam}</span>
+          <span> - </span>
+          <span>{opponentTeam}</span>
         </h1>
         <br />
         <h2>
