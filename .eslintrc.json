@@ -4,6 +4,9 @@
     "next/typescript",
     "prettier"
   ],
+  "ignorePatterns": [
+    "database.types.ts"
+  ],
   "rules": {
     "no-var": "warn",
     "object-shorthand": [
@@ -570,17 +573,3 @@
     "React": true
   }
 }
-// {
-//   "extends": [
-//     "next/core-web-vitals",
-//     "next/typescript"
-//   ],
-//   "rules": {
-//     "no-trailing-spaces": "error",
-//     "semi": [
-//       "error",
-//       "never"
-//     ],
-//     "sort-imports": "error",
-//   },
-// }

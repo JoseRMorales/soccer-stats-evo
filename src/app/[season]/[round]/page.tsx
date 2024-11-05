@@ -1,10 +1,14 @@
 import {
+  getAssistsNumber,
+  getGoalsNumber,
   getMatchAssists,
   getMatchLineup,
   getMatchRedCards,
   getMatchScorers,
   getMatchTeams,
   getMatchYellowCards,
+  getPenaltiesSaved,
+  getPlayedMatches,
   getPlayerInfo
 } from '@/app/actions'
 import GameStats from '@/components/GameStats'
@@ -36,12 +40,21 @@ const GamePage = async ({
   const players = await Promise.all(
     lineup.map(async (player) => {
       const playerInfo = await getPlayerInfo(season, player.player_number)
+      const playedMatches = await getPlayedMatches(season, player.player_number)
+      const assists = await getAssistsNumber(season, player.player_number)
+      const goals = await getGoalsNumber(season, player.player_number)
+      const penalties = await getPenaltiesSaved(season, player.player_number)
+
       return {
         ...player,
         starter: player.player_position !== -1,
         playerCardInfo: {
           ...playerInfo,
-          number: player.player_number
+          number: player.player_number,
+          playedMatches,
+          assists,
+          goals,
+          penalties
         }
       }
     })

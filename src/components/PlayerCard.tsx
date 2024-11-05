@@ -57,11 +57,11 @@ const PlayerCard = async ({
             </div>
             <dl className="stats grid grid-cols-[repeat(2,auto)] gap-x-2 w-max mb-12 mx-auto text-4xl uppercase">
               <dt>games</dt>
-              <dd className="text-right">100</dd>
+              <dd className="text-right">{playerCardInfo.playedMatches}</dd>
               <dt>goals</dt>
-              <dd className="text-right">50</dd>
+              <dd className="text-right">{playerCardInfo.goals}</dd>
               <dt>assists</dt>
-              <dd className="text-right">25</dd>
+              <dd className="text-right">{playerCardInfo.assists}</dd>
             </dl>
           </div>
         </div>

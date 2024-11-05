@@ -212,7 +212,7 @@ export const getPlayedMatches = async (
     throw new APIError(error.message)
   }
 
-  return data
+  return data[0].played_matches
 }
 
 export const getGoalsNumber = async (season: string, playerNumber: number) => {
@@ -227,7 +227,7 @@ export const getGoalsNumber = async (season: string, playerNumber: number) => {
     throw new APIError(error.message)
   }
 
-  return data
+  return data[0].goals || 0
 }
 
 export const getAssistsNumber = async (
@@ -244,8 +244,7 @@ export const getAssistsNumber = async (
     console.error(error)
     throw new APIError(error.message)
   }
-
-  return data
+  return data[0].assists || 0
 }
 
 export const getYellowCardsNumber = async (
@@ -263,7 +262,7 @@ export const getYellowCardsNumber = async (
     throw new APIError(error.message)
   }
 
-  return data
+  return data[0].yellow_cards || 0
 }
 
 export const getRedCardsNumber = async (
@@ -281,13 +280,13 @@ export const getRedCardsNumber = async (
     throw new APIError(error.message)
   }
 
-  return data
+  return data[0].red_cards || 0
 }
 
 export const getPenaltiesSaved = async (
   season: string,
   playerNumber: number
-) => {
+): Promise<[number, number]> => {
   const client = await createClient()
   const { data, error } = await client.rpc('get_penalties_saved', {
     input_season: season,
@@ -299,5 +298,5 @@ export const getPenaltiesSaved = async (
     throw new APIError(error.message)
   }
 
-  return data
+  return [data[0].saved_penalties || 0, data[0].total_penalties || 0]
 }
