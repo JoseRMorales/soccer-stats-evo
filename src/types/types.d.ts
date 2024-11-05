@@ -4,5 +4,7 @@ export interface PlayerCardInfo {
   playedMatches: number
   assists: number
   goals: number
+  yellowCards: number
+  redCards: number
   penalties: [number, number]
 }

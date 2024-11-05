@@ -5,7 +5,7 @@
 @layer base {
   :root {
     --background: 24 9.8% 10%;
-    --background-gradient: 134, 65%, 19%;
+    --background-gradient: 134 65% 19%;
     --foreground: 0 0% 95%;
     --card: 24 9.8% 10%;
     --card-foreground: 0 0% 95%;
@@ -24,6 +24,7 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 142.4 71.8% 29.2%;
+    --radius: 0.75rem;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;

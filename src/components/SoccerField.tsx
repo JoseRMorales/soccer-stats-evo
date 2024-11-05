@@ -1,7 +1,6 @@
 import PlayerCard from '@/components/PlayerCard'
 import lineups from '@/lib/lineups'
 import { PlayerCardInfo } from '@/types/types'
-
 const positions = lineups['3-2-1']
 
 interface Starters {

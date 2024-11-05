@@ -9,7 +9,9 @@ import {
   getMatchYellowCards,
   getPenaltiesSaved,
   getPlayedMatches,
-  getPlayerInfo
+  getPlayerInfo,
+  getRedCardsNumber,
+  getYellowCardsNumber
 } from '@/app/actions'
 import GameStats from '@/components/GameStats'
 import Header from '@/components/Header'
@@ -44,6 +46,11 @@ const GamePage = async ({
       const assists = await getAssistsNumber(season, player.player_number)
       const goals = await getGoalsNumber(season, player.player_number)
       const penalties = await getPenaltiesSaved(season, player.player_number)
+      const yellowCards = await getYellowCardsNumber(
+        season,
+        player.player_number
+      )
+      const redCards = await getRedCardsNumber(season, player.player_number)
 
       return {
         ...player,
@@ -54,6 +61,8 @@ const GamePage = async ({
           playedMatches,
           assists,
           goals,
+          yellowCards,
+          redCards,
           penalties
         }
       }
