@@ -36,9 +36,9 @@ const PlayerCard = async ({
     : `${commonClasses} scale-[50%] sm:scale-[70%] hover:scale-[55%] sm:hover:scale-[75%]`
 
   return (
-    <Dialog>
-      <DialogTrigger>
-        <div className={classes} style={styleObject}>
+    <div className={classes} style={styleObject}>
+      <Dialog>
+        <DialogTrigger>
           <div id="card" className="active">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 270 430">
               <clipPath id="svgPath">
@@ -75,48 +75,54 @@ const PlayerCard = async ({
               </div>
             </div>
           </div>
-        </div>
-      </DialogTrigger>
-      <DialogContent className="border-primary">
-        <DialogHeader>
-          <DialogTitle>Player Info</DialogTitle>
-          <DialogDescription className="flex justify-between text-xl items-center">
-            <img
-              src={backgroundImage}
-              alt="Player"
-              className="w-20 h-20 rounded-full"
-            />
-            <span>{playerCardInfo.number}</span>
-            <span>{playerCardInfo.name}</span>
+        </DialogTrigger>
+        <DialogContent className="border-primary">
+          <DialogHeader>
+            <DialogTitle>Player Info</DialogTitle>
+            <DialogDescription className="flex justify-between text-xl items-center text-foreground">
+              <img
+                src={backgroundImage}
+                alt="Player"
+                className="w-20 h-20 rounded-full"
+              />
+              <span className="text-3xl">{playerCardInfo.number}</span>
+              <span>{playerCardInfo.name}</span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogHeader>
+            <DialogTitle>Player Stats</DialogTitle>
+          </DialogHeader>
+          <DialogDescription className="text-md">
+            <dl className="grid grid-cols-[repeat(2,auto)] gap-x-2 w-full">
+              <dt>Games</dt>
+              <dd className="text-right font-bold text-foreground">
+                {playerCardInfo.playedMatches}
+              </dd>
+              <dt>Goals</dt>
+              <dd className="text-right font-bold text-foreground">
+                {playerCardInfo.goals}
+              </dd>
+              <dt>Assists</dt>
+              <dd className="text-right font-bold text-foreground">
+                {playerCardInfo.assists}
+              </dd>
+              <dt>Yellow Cards</dt>
+              <dd className="text-right font-bold text-foreground">
+                {playerCardInfo.yellowCards}
+              </dd>
+              <dt>Red Cards</dt>
+              <dd className="text-right font-bold text-foreground">
+                {playerCardInfo.redCards}
+              </dd>
+              <dt>Saved Penalties</dt>
+              <dd className="text-right font-bold text-foreground">
+                {playerCardInfo.penalties[0]}/{playerCardInfo.penalties[1]}
+              </dd>
+            </dl>
           </DialogDescription>
-        </DialogHeader>
-        <DialogHeader>
-          <DialogTitle>Player Stats</DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="text-md">
-          <dl className="grid grid-cols-[repeat(2,auto)] gap-x-2 w-full">
-            <dt>Games</dt>
-            <dd className="text-right font-bold">
-              {playerCardInfo.playedMatches}
-            </dd>
-            <dt>Goals</dt>
-            <dd className="text-right font-bold">{playerCardInfo.goals}</dd>
-            <dt>Assists</dt>
-            <dd className="text-right font-bold">{playerCardInfo.assists}</dd>
-            <dt>Yellow Cards</dt>
-            <dd className="text-right font-bold">
-              {playerCardInfo.yellowCards}
-            </dd>
-            <dt>Red Cards</dt>
-            <dd className="text-right font-bold">{playerCardInfo.redCards}</dd>
-            <dt>Saved Penalties</dt>
-            <dd className="text-right font-bold">
-              {playerCardInfo.penalties[0]}/{playerCardInfo.penalties[1]}
-            </dd>
-          </dl>
-        </DialogDescription>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
 
