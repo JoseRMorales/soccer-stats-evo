@@ -1,16 +1,31 @@
+import { getPlayerStats, getStarters } from '@/app/actions'
 import PlayerCard from '@/components/PlayerCard'
 import lineups from '@/lib/lineups'
-import { PlayerStats } from '@/types/types'
 const positions = lineups['3-2-1']
 
-interface Starters {
-  player_number: number
-  player_position: number
-  starter: boolean
-  playerStats: PlayerStats
-}
+const SoccerField = async ({
+  season,
+  round
+}: {
+  season: string
+  round: number
+}) => {
+  const starters = await getStarters(season, round)
 
-const SoccerField = ({ starters }: { starters: Starters[] }) => {
+  const players = await Promise.all(
+    starters.map(async (player) => {
+      const playerStats = await getPlayerStats(season, player.player_number)
+
+      return {
+        ...player,
+        starter: player.player_position !== -1,
+        playerStats: {
+          ...playerStats
+        }
+      }
+    })
+  )
+
   return (
     <div className="relative m-4">
       <img
@@ -21,7 +36,7 @@ const SoccerField = ({ starters }: { starters: Starters[] }) => {
         style={{ maskImage: 'linear-gradient(to top, black 80%, transparent)' }}
       />
 
-      {starters.map((player) => {
+      {players.map((player) => {
         const index = player.player_position - 1
         const { x, y } = positions[index]
         return (

@@ -409,6 +409,16 @@ export type Database = {
           assists: number
         }[]
       }
+      get_bench: {
+        Args: {
+          input_season: string
+          input_round: number
+        }
+        Returns: {
+          player_number: number
+          player_position: number
+        }[]
+      }
       get_goals_number: {
         Args: {
           input_season: string
@@ -525,6 +535,16 @@ export type Database = {
         }
         Returns: {
           red_cards: number
+        }[]
+      }
+      get_starters: {
+        Args: {
+          input_season: string
+          input_round: number
+        }
+        Returns: {
+          player_number: number
+          player_position: number
         }[]
       }
       get_yellow_cards_number: {

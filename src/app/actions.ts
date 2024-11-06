@@ -344,3 +344,33 @@ export const getMatchStats = async (
     redCards
   }
 }
+
+export const getStarters = async (season: string, round: number) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_starters', {
+    input_season: season,
+    input_round: round
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
+
+export const getBench = async (season: string, round: number) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_bench', {
+    input_season: season,
+    input_round: round
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}

@@ -1,27 +1,31 @@
 import React from 'react'
 
-import { MatchStats } from '@/types/types'
+import { getMatchStats, getMatchTeams } from '@/app/actions'
+import { APIError } from '@/lib/errors'
 import {
   IconBallFootball,
   IconCardsFilled,
   IconShoe
 } from '@tabler/icons-react'
+import { redirect } from 'next/navigation'
 
-const GameStats = ({
-  ownerTeam,
-  opponentTeam,
-  scoredGoals,
-  concededGoals,
-  matchStats
+const GameStats = async ({
+  season,
+  round
 }: {
-  ownerTeam: string
-  opponentTeam: string
-  scoredGoals: number | null
-  concededGoals: number | null
-  matchStats: MatchStats
+  season: string
+  round: number
 }) => {
+  const { ownerTeam, opponentTeam, scoredGoals, concededGoals } =
+    await getMatchTeams(season, Number(round)).catch((error: APIError) => {
+      console.error(error)
+      redirect('/404')
+    })
+
+  const matchStats = await getMatchStats(season, round)
+
   return (
-    <div className="flex flex-col text-center space-y-6 max-w-md overflow-hidden">
+    <div className="flex flex-col text-center space-y-6 w-96 overflow-hidden">
       <div className="text-4xl font-bold uppercase break-words">
         <h1 className="flex flex-col">
           <span>{ownerTeam}</span>

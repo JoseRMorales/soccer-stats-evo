@@ -6,7 +6,6 @@
 
 ## TODDs
 
-- [ ] Performance improvements. Dynamic rendering
 - [ ] Static site generation
 - [ ] Lineup builder
 - [ ] Classification
