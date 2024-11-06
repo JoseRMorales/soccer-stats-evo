@@ -1,17 +1,8 @@
 import {
-  getAssistsNumber,
-  getGoalsNumber,
-  getMatchAssists,
   getMatchLineup,
-  getMatchRedCards,
-  getMatchScorers,
+  getMatchStats,
   getMatchTeams,
-  getMatchYellowCards,
-  getPenaltiesSaved,
-  getPlayedMatches,
-  getPlayerInfo,
-  getRedCardsNumber,
-  getYellowCardsNumber
+  getPlayerStats
 } from '@/app/actions'
 import GameStats from '@/components/GameStats'
 import Header from '@/components/Header'
@@ -33,37 +24,20 @@ const GamePage = async ({
       console.error(error)
       redirect('/404')
     })
-  const scorers = await getMatchScorers(season, roundNumber)
-  const assists = await getMatchAssists(season, roundNumber)
-  const yellowCards = await getMatchYellowCards(season, roundNumber)
-  const redCards = await getMatchRedCards(season, roundNumber)
+
+  const matchStats = await getMatchStats(season, roundNumber)
+
   const lineup = await getMatchLineup(season, roundNumber)
 
   const players = await Promise.all(
     lineup.map(async (player) => {
-      const playerInfo = await getPlayerInfo(season, player.player_number)
-      const playedMatches = await getPlayedMatches(season, player.player_number)
-      const assists = await getAssistsNumber(season, player.player_number)
-      const goals = await getGoalsNumber(season, player.player_number)
-      const penalties = await getPenaltiesSaved(season, player.player_number)
-      const yellowCards = await getYellowCardsNumber(
-        season,
-        player.player_number
-      )
-      const redCards = await getRedCardsNumber(season, player.player_number)
+      const playerStats = await getPlayerStats(season, player.player_number)
 
       return {
         ...player,
         starter: player.player_position !== -1,
-        playerCardInfo: {
-          ...playerInfo,
-          number: player.player_number,
-          playedMatches,
-          assists,
-          goals,
-          yellowCards,
-          redCards,
-          penalties
+        playerStats: {
+          ...playerStats
         }
       }
     })
@@ -83,10 +57,7 @@ const GamePage = async ({
             opponentTeam={opponentTeam}
             scoredGoals={scoredGoals}
             concededGoals={concededGoals}
-            scorers={scorers}
-            assists={assists}
-            yellowCards={yellowCards}
-            redCards={redCards}
+            matchStats={matchStats}
           />
         </aside>
         {/* Lineup section */}
@@ -102,8 +73,9 @@ const GamePage = async ({
               {bench.map((player) => (
                 <PlayerCard
                   key={player.player_number}
+                  playerNumber={player.player_number}
                   starter={player.starter}
-                  playerCardInfo={player.playerCardInfo}
+                  playerStats={player.playerStats}
                 />
               ))}
             </ScrollArea>
@@ -113,8 +85,9 @@ const GamePage = async ({
                 {bench.map((player) => (
                   <PlayerCard
                     key={player.player_number}
+                    playerNumber={player.player_number}
                     starter={player.starter}
-                    playerCardInfo={player.playerCardInfo}
+                    playerStats={player.playerStats}
                   />
                 ))}
               </div>

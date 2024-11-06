@@ -1,22 +1,24 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { PlayerCardInfo } from '@/types/types'
+import { PlayerStats } from '@/types/types'
+
 const PlayerCard = async ({
   x = 0,
   y = 0,
   starter = true,
-  playerCardInfo
+  playerNumber,
+  playerStats
 }: {
   x?: number
   y?: number
   starter?: boolean
-  playerCardInfo: PlayerCardInfo
+  playerNumber: number
+  playerStats: PlayerStats
 }) => {
   const backgroundImage = '/defaultAvatar.png'
 
@@ -62,15 +64,15 @@ const PlayerCard = async ({
               </div>
               <div id="card-bottom">
                 <div className="name">
-                  {playerCardInfo.number} - {playerCardInfo.name}
+                  {playerNumber} - {playerStats.player_name}
                 </div>
                 <dl className="stats grid grid-cols-[repeat(2,auto)] gap-x-2 w-max mb-12 mx-auto text-4xl uppercase">
                   <dt>games</dt>
-                  <dd className="text-right">{playerCardInfo.playedMatches}</dd>
+                  <dd className="text-right">{playerStats.played_matches}</dd>
                   <dt>goals</dt>
-                  <dd className="text-right">{playerCardInfo.goals}</dd>
+                  <dd className="text-right">{playerStats.total_goals}</dd>
                   <dt>assists</dt>
-                  <dd className="text-right">{playerCardInfo.assists}</dd>
+                  <dd className="text-right">{playerStats.total_assists}</dd>
                 </dl>
               </div>
             </div>
@@ -79,47 +81,48 @@ const PlayerCard = async ({
         <DialogContent className="border-primary">
           <DialogHeader>
             <DialogTitle>Player Info</DialogTitle>
-            <DialogDescription className="flex justify-between text-xl items-center text-foreground">
+            <div className="flex justify-between text-xl items-center text-foreground">
               <img
                 src={backgroundImage}
                 alt="Player"
                 className="w-20 h-20 rounded-full"
               />
-              <span className="text-3xl">{playerCardInfo.number}</span>
-              <span>{playerCardInfo.name}</span>
-            </DialogDescription>
+              <span className="text-3xl">{playerNumber}</span>
+              <span>{playerStats.player_name}</span>
+            </div>
           </DialogHeader>
           <DialogHeader>
             <DialogTitle>Player Stats</DialogTitle>
           </DialogHeader>
-          <DialogDescription className="text-md">
+          <div className="text-md">
             <dl className="grid grid-cols-[repeat(2,auto)] gap-x-2 w-full">
               <dt>Games</dt>
               <dd className="text-right font-bold text-foreground">
-                {playerCardInfo.playedMatches}
+                {playerStats.played_matches}
               </dd>
               <dt>Goals</dt>
               <dd className="text-right font-bold text-foreground">
-                {playerCardInfo.goals}
+                {playerStats.total_goals}
               </dd>
               <dt>Assists</dt>
               <dd className="text-right font-bold text-foreground">
-                {playerCardInfo.assists}
+                {playerStats.total_assists}
               </dd>
               <dt>Yellow Cards</dt>
               <dd className="text-right font-bold text-foreground">
-                {playerCardInfo.yellowCards}
+                {playerStats.total_yellow_cards}
               </dd>
               <dt>Red Cards</dt>
               <dd className="text-right font-bold text-foreground">
-                {playerCardInfo.redCards}
+                {playerStats.total_red_cards}
               </dd>
               <dt>Saved Penalties</dt>
               <dd className="text-right font-bold text-foreground">
-                {playerCardInfo.penalties[0]}/{playerCardInfo.penalties[1]}
+                {playerStats.total_penalties_saved}/
+                {playerStats.total_penalties}
               </dd>
             </dl>
-          </DialogDescription>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

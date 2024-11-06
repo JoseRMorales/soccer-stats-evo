@@ -1,13 +1,13 @@
 import PlayerCard from '@/components/PlayerCard'
 import lineups from '@/lib/lineups'
-import { PlayerCardInfo } from '@/types/types'
+import { PlayerStats } from '@/types/types'
 const positions = lineups['3-2-1']
 
 interface Starters {
   player_number: number
   player_position: number
   starter: boolean
-  playerCardInfo: PlayerCardInfo
+  playerStats: PlayerStats
 }
 
 const SoccerField = ({ starters }: { starters: Starters[] }) => {
@@ -30,7 +30,8 @@ const SoccerField = ({ starters }: { starters: Starters[] }) => {
             x={x}
             y={y}
             starter={player.starter}
-            playerCardInfo={player.playerCardInfo}
+            playerNumber={player.player_number}
+            playerStats={player.playerStats}
           />
         )
       })}

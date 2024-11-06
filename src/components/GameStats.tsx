@@ -1,39 +1,24 @@
 import React from 'react'
 
-import { Database } from '@/types/database.types'
+import { MatchStats } from '@/types/types'
 import {
   IconBallFootball,
   IconCardsFilled,
   IconShoe
 } from '@tabler/icons-react'
 
-type scorersResponse =
-  Database['public']['Functions']['get_match_scorers']['Returns']
-type assistsResponse =
-  Database['public']['Functions']['get_match_assists']['Returns']
-type yellowCardsResponse =
-  Database['public']['Functions']['get_match_yellow_cards']['Returns']
-type redCardsResponse =
-  Database['public']['Functions']['get_match_red_cards']['Returns']
-
 const GameStats = ({
   ownerTeam,
   opponentTeam,
   scoredGoals,
   concededGoals,
-  scorers,
-  assists,
-  yellowCards,
-  redCards
+  matchStats
 }: {
   ownerTeam: string
   opponentTeam: string
   scoredGoals: number | null
   concededGoals: number | null
-  scorers: scorersResponse
-  assists: assistsResponse
-  yellowCards: yellowCardsResponse
-  redCards: redCardsResponse
+  matchStats: MatchStats
 }) => {
   return (
     <div className="flex flex-col text-center space-y-6 max-w-md overflow-hidden">
@@ -49,44 +34,52 @@ const GameStats = ({
         </h2>
       </div>
       <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl p-4">
-        {scorers.map((scorer) => (
-          <React.Fragment key={scorer.player_name}>
-            <dt>
+        {matchStats.goals.map((goal) => (
+          <React.Fragment key={goal.player_name}>
+            <dt className="flex space-x-1">
               <IconBallFootball size={24} stroke={2} />
+              {<span>{goal.goals > 1 ? `x${goal.goals}` : ''}</span>}
             </dt>
             <dd className="text-right">
-              <span>{scorer.player_name}</span>
-              {
-                <span>
-                  {scorer.goals_amount > 1 ? `x${scorer.goals_amount}` : ''}
-                </span>
-              }
+              <span>{goal.player_name}</span>
             </dd>
           </React.Fragment>
         ))}
       </dl>
       <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl">
-        {assists.map((assist) => (
+        {matchStats.assists.map((assist) => (
           <React.Fragment key={assist.player_name}>
-            <dt>
+            <dt className="flex space-x-1">
               <IconShoe size={24} stroke={2} />
+              {<span>{assist.assists > 1 ? ` x${assist.assists}` : ''}</span>}
             </dt>
-            <dd className="text-right">{assist.player_name}</dd>
+            <dd className="text-right">
+              <span>{assist.player_name}</span>
+            </dd>
           </React.Fragment>
         ))}
       </dl>
       <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl">
-        {yellowCards.map((yellowCard) => (
+        {matchStats.yellowCards.map((yellowCard) => (
           <React.Fragment key={yellowCard.player_name}>
-            <dt>
+            <dt className="flex space-x-1">
               <IconCardsFilled size={24} stroke={2} color="yellow" />
+              {
+                <span>
+                  {yellowCard.yellow_cards > 1
+                    ? ` x${yellowCard.yellow_cards}`
+                    : ''}
+                </span>
+              }
             </dt>
-            <dd className="text-right">{yellowCard.player_name}</dd>
+            <dd className="text-right">
+              <span>{yellowCard.player_name}</span>
+            </dd>
           </React.Fragment>
         ))}
       </dl>
       <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl">
-        {redCards.map((redCard) => (
+        {matchStats.redCards.map((redCard) => (
           <React.Fragment key={redCard.player_name}>
             <dt>
               <IconCardsFilled size={24} stroke={2} color="red" />

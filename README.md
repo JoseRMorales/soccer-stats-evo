@@ -2,11 +2,12 @@
 
 ## Attributions
 
-<a href="https://www.vecteezy.com/free-vector/default-user">Default User Vectors by Vecteezy</a>
+[Default User Vectors by Vecteezy](https://www.vecteezy.com/free-vector/default-user)
 
 ## TODDs
 
-- [ ] Fix main layout
-- [ ] Better RPC for stats
+- [ ] Performance improvements. Dynamic rendering
+- [ ] Static site generation
 - [ ] Lineup builder
 - [ ] Classification
+- [ ] Match date and time

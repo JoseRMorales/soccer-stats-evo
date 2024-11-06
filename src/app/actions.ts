@@ -2,6 +2,7 @@
 
 import { APIError } from '@/lib/errors'
 import { createClient } from '@/lib/supabase/server'
+import { MatchStats } from '@/types/types'
 import { redirect } from 'next/navigation'
 
 export const goToCurrentRound = async () => {
@@ -299,4 +300,47 @@ export const getPenaltiesSaved = async (
   }
 
   return [data[0].saved_penalties || 0, data[0].total_penalties || 0]
+}
+
+export const getPlayerStats = async (season: string, playerNumber: number) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_player_stats', {
+    season_input: season,
+    player_number: playerNumber
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data?.[0]
+}
+
+export const getMatchStats = async (
+  season: string,
+  round: number
+): Promise<MatchStats> => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_match_stats', {
+    input_round: round,
+    input_season: season
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  const goals = data.filter((stat) => stat.stat_type === 'goal')
+  const assists = data.filter((stat) => stat.stat_type === 'assist')
+  const yellowCards = data.filter((stat) => stat.stat_type === 'yellow_card')
+  const redCards = data.filter((stat) => stat.stat_type === 'red_card')
+
+  return {
+    goals,
+    assists,
+    yellowCards,
+    redCards
+  }
 }

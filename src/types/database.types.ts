@@ -457,6 +457,21 @@ export type Database = {
           goals_amount: number
         }[]
       }
+      get_match_stats: {
+        Args: {
+          input_season: string
+          input_round: number
+        }
+        Returns: {
+          stat_type: string
+          player_name: string
+          player_number: number
+          goals: number
+          assists: number
+          yellow_cards: number
+          red_cards: number
+        }[]
+      }
       get_match_yellow_cards: {
         Args: {
           input_season: string
@@ -484,6 +499,23 @@ export type Database = {
         }
         Returns: {
           played_matches: number
+        }[]
+      }
+      get_player_stats: {
+        Args: {
+          season_input: string
+          player_number: number
+        }
+        Returns: {
+          season: string
+          player_name: string
+          played_matches: number
+          total_goals: number
+          total_assists: number
+          total_penalties: number
+          total_penalties_saved: number
+          total_red_cards: number
+          total_yellow_cards: number
         }[]
       }
       get_red_cards_number: {
