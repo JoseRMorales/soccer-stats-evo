@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { getMatchStats, getMatchTeams } from '@/app/actions'
+import { getMatchDate, getMatchStats, getMatchTeams } from '@/app/actions'
 import { APIError } from '@/lib/errors'
 import {
   IconBallFootball,
@@ -23,10 +23,20 @@ const GameStats = async ({
     })
 
   const matchStats = await getMatchStats(season, round)
+  const matchDate = await getMatchDate(season, round)
 
   return (
     <div className="flex flex-col text-center space-y-6 w-96 overflow-hidden">
       <div className="text-4xl font-bold uppercase break-words">
+        <h3 className="text-2xl pb-4">
+          {matchDate?.toLocaleString('es-ES', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric'
+          })}
+        </h3>
         <h1 className="flex flex-col">
           <span>{ownerTeam}</span>
           <span> - </span>
@@ -50,7 +60,7 @@ const GameStats = async ({
           </React.Fragment>
         ))}
       </dl>
-      <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl">
+      <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl p-4">
         {matchStats.assists.map((assist) => (
           <React.Fragment key={assist.player_name}>
             <dt className="flex space-x-1">
@@ -63,7 +73,7 @@ const GameStats = async ({
           </React.Fragment>
         ))}
       </dl>
-      <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl">
+      <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl p-4">
         {matchStats.yellowCards.map((yellowCard) => (
           <React.Fragment key={yellowCard.player_name}>
             <dt className="flex space-x-1">
@@ -82,7 +92,7 @@ const GameStats = async ({
           </React.Fragment>
         ))}
       </dl>
-      <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl">
+      <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl p-4">
         {matchStats.redCards.map((redCard) => (
           <React.Fragment key={redCard.player_name}>
             <dt>

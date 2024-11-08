@@ -8,5 +8,5 @@
 
 - [ ] Static site generation
 - [ ] Lineup builder
-- [ ] Classification
-- [ ] Match date and time
+- [ ] Classification#
+- [ ] Local deployment

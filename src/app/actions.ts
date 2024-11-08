@@ -374,3 +374,30 @@ export const getBench = async (season: string, round: number) => {
 
   return data
 }
+
+export const getMatchDate = async (season: string, round: number) => {
+  const client = await createClient()
+  const { data, error } = await client
+    .from('Matches')
+    .select(
+      `
+    date,
+    time
+    `
+    )
+    .eq('season', season)
+    .eq('round', round)
+    .single()
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  const date = data?.date
+  const time = data?.time
+
+  const dateTime = new Date(`${date}T${time}`)
+
+  return data ? dateTime : null
+}
