@@ -12,3 +12,10 @@ export type MatchStats = {
   yellowCards: MatchStat[]
   redCards: MatchStat[]
 }
+
+export type LineupBuilderPlayer = {
+  name: string
+  number: number
+  position: number
+  playerStats: PlayerStats
+}

@@ -1,6 +1,8 @@
+import { isMatchPlayed } from '@/app/actions'
 import Bench from '@/components/Bench'
 import GameStats from '@/components/GameStats'
 import Header from '@/components/Header'
+import LineupBuilderContainer from '@/components/LineupBuilderContainer'
 import BenchSkeleton from '@/components/skeletons/BenchSkeleton'
 import GameStatsSkeleton from '@/components/skeletons/GameStatsSkeleton'
 import HeaderSkeleton from '@/components/skeletons/HeaderSkeleton'
@@ -16,6 +18,8 @@ const GamePage = async ({
   const { season, round } = await params
   const roundNumber = Number(round)
 
+  const matchPlayed = await isMatchPlayed(season, roundNumber)
+
   return (
     <div className="flex flex-col min-h-screen">
       <Suspense fallback={<HeaderSkeleton />}>
@@ -30,18 +34,24 @@ const GamePage = async ({
         </aside>
         {/* Lineup section */}
         <main className="flex flex-col 2xl:flex-row justify-between w-full 2xl:w-fit">
-          {/* Starters section */}
-          <section className="flex justify-center items-center 2xl:h-screen h-fit py-4 w-full 2xl:px-16">
-            <Suspense fallback={<SoccerFieldSkeleton />}>
-              <SoccerField season={season} round={roundNumber} />
-            </Suspense>
-          </section>
-          {/* Bench section */}
-          <aside>
-            <Suspense fallback={<BenchSkeleton />}>
-              <Bench season={season} round={roundNumber} />
-            </Suspense>
-          </aside>
+          {matchPlayed ? (
+            <>
+              {/* Starters section */}
+              <section className="flex justify-center items-center 2xl:h-screen h-fit py-4 w-full 2xl:px-16">
+                <Suspense fallback={<SoccerFieldSkeleton />}>
+                  <SoccerField season={season} round={roundNumber} />
+                </Suspense>
+              </section>
+              {/* Bench section */}
+              <aside>
+                <Suspense fallback={<BenchSkeleton />}>
+                  <Bench season={season} round={roundNumber} />
+                </Suspense>
+              </aside>
+            </>
+          ) : (
+            <LineupBuilderContainer season={season} />
+          )}
         </main>
       </div>
       <div />
