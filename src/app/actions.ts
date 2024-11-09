@@ -401,3 +401,35 @@ export const getMatchDate = async (season: string, round: number) => {
 
   return data ? dateTime : null
 }
+
+export const getPlayers = async (season: string) => {
+  const client = await createClient()
+  const { data, error } = await client
+    .from('Players')
+    .select('name, number')
+    .eq('season', season)
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
+
+export const isMatchPlayed = async (season: string, round: number) => {
+  const client = await createClient()
+  const { data, error } = await client
+    .from('Matches')
+    .select('played')
+    .eq('season', season)
+    .eq('round', round)
+    .single()
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data?.played
+}

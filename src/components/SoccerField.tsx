@@ -1,7 +1,6 @@
 import { getPlayerStats, getStarters } from '@/app/actions'
 import PlayerCard from '@/components/PlayerCard'
 import lineups from '@/lib/lineups'
-const positions = lineups['3-2-1']
 
 const SoccerField = async ({
   season,
@@ -11,6 +10,8 @@ const SoccerField = async ({
   round: number
 }) => {
   const starters = await getStarters(season, round)
+
+  const positions = lineups['3-2-1']
 
   const players = await Promise.all(
     starters.map(async (player) => {

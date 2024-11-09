@@ -189,10 +189,6 @@
         "exceptAfterSingleLine": true
       }
     ],
-    "multiline-ternary": [
-      "error",
-      "always-multiline"
-    ],
     "new-cap": [
       "error",
       {

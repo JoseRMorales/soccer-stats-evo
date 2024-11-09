@@ -44,7 +44,11 @@ const GameStats = async ({
         </h1>
         <br />
         <h2>
-          {scoredGoals} - {concededGoals}
+          {scoredGoals && concededGoals && (
+            <span>
+              {scoredGoals} - {concededGoals}
+            </span>
+          )}
         </h2>
       </div>
       <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl p-4">

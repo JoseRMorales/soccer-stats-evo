@@ -8,5 +8,5 @@
 
 - [ ] Static site generation
 - [ ] Lineup builder
-- [ ] Classification#
+- [ ] Classification
 - [ ] Local deployment
