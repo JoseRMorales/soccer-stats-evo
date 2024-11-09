@@ -4,7 +4,6 @@ import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList
 } from '@/components/ui/command'
@@ -100,7 +99,6 @@ const PlayerCard = ({
         </PopoverTrigger>
         <PopoverContent className="w-[200px] p-0">
           <Command>
-            <CommandInput placeholder="Search player" />
             <CommandList>
               <CommandEmpty>No results found</CommandEmpty>
               <CommandGroup>
