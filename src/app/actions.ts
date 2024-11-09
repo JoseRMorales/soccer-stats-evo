@@ -433,3 +433,20 @@ export const isMatchPlayed = async (season: string, round: number) => {
 
   return data?.played
 }
+
+export const getAllRounds = async () => {
+  const client = await createClient()
+  const { data, error } = await client.from('Matches').select(
+    `
+    season,
+    round
+    `
+  )
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
