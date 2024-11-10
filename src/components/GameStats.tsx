@@ -44,14 +44,14 @@ const GameStats = async ({
         </h1>
         <br />
         <h2>
-          {scoredGoals && concededGoals && (
+          {scoredGoals !== null && concededGoals !== null && (
             <span>
               {scoredGoals} - {concededGoals}
             </span>
           )}
         </h2>
       </div>
-      {scoredGoals && concededGoals && (
+      {scoredGoals !== null && concededGoals !== null && (
         <>
           <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl p-4">
             {matchStats.goals.map((goal) => (
