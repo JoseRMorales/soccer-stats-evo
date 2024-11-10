@@ -9,6 +9,3 @@ const loading = () => {
 }
 
 export default loading
-
-export const dynamic = 'force-static'
-export const revalidate = 3600
