@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { MatchStats } from '@/types/types'
 import { redirect } from 'next/navigation'
 
-export const goToCurrentRound = async () => {
+export const getCurrentRound = async () => {
   const date = new Date()
   const month = date.getMonth()
   const day = date.getDate()
@@ -39,7 +39,18 @@ export const goToCurrentRound = async () => {
     )
   })
 
-  redirect(`/${season}/${match?.round}`)
+  const round = match?.round
+
+  return {
+    season,
+    round
+  }
+}
+
+export const goToCurrentRound = async () => {
+  const { season, round } = await getCurrentRound()
+
+  redirect(`/season/${season}/round/${round}`)
 }
 
 export const getMatchTeams = async (season: string, round: number) => {
@@ -449,4 +460,29 @@ export const getAllRounds = async () => {
   }
 
   return data
+}
+
+export const getStandings = async (season: string) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_standing', {
+    season_input: season
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  const standings = data
+    .map((team) => {
+      const points = team.won * 3 + team.drawn * 1
+
+      return {
+        ...team,
+        points
+      }
+    })
+    .sort((a, b) => b.points - a.points)
+
+  return standings
 }

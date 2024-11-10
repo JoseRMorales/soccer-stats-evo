@@ -341,6 +341,48 @@ export type Database = {
         }
         Relationships: []
       }
+      Standings: {
+        Row: {
+          drawn: number
+          lost: number
+          played: number
+          season: string
+          team_id: string
+          won: number
+        }
+        Insert: {
+          drawn?: number
+          lost?: number
+          played?: number
+          season: string
+          team_id: string
+          won?: number
+        }
+        Update: {
+          drawn?: number
+          lost?: number
+          played?: number
+          season?: string
+          team_id?: string
+          won?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Standings_season_fkey"
+            columns: ["season"]
+            isOneToOne: false
+            referencedRelation: "Seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Standings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "Teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Teams: {
         Row: {
           id: string
@@ -350,7 +392,7 @@ export type Database = {
         Insert: {
           id?: string
           name: string
-          owner: boolean
+          owner?: boolean
         }
         Update: {
           id?: string
@@ -535,6 +577,18 @@ export type Database = {
         }
         Returns: {
           red_cards: number
+        }[]
+      }
+      get_standing: {
+        Args: {
+          season_input: string
+        }
+        Returns: {
+          name: string
+          played: number
+          won: number
+          drawn: number
+          lost: number
         }[]
       }
       get_starters: {
