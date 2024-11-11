@@ -29,13 +29,14 @@ const GameStats = async ({
     <div className="flex flex-col text-center space-y-6 w-96 overflow-hidden">
       <div className="text-4xl font-bold uppercase break-words">
         <h3 className="text-2xl pb-4">
-          {matchDate?.toLocaleString('es-ES', {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric'
-          })}
+          {matchDate &&
+            matchDate?.toLocaleString('es-ES', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric'
+            })}
         </h3>
         <h1 className="flex flex-col">
           <span>{ownerTeam}</span>

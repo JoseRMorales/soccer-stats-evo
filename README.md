@@ -6,11 +6,13 @@ With this app, you can have a nice overview of the team's performance, and you c
 
 Manage your team's stats via Supabase dashboard, and display them on your website.
 
+Mobile friendly.
+
 ## Attributions
 
 [Default User Vectors by Vecteezy](https://www.vecteezy.com/free-vector/default-user)
 
-## TODDs
+## TODOs
 
 - [ ] Local deployment
 - [ ] Avatar images

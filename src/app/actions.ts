@@ -410,9 +410,13 @@ export const getMatchDate = async (season: string, round: number) => {
   const date = data?.date
   const time = data?.time
 
+  if (!date || !time) return null
+
+  if (!time) return new Date(date)
+
   const dateTime = new Date(`${date}T${time}`)
 
-  return data ? dateTime : null
+  return dateTime
 }
 
 export const getPlayers = async (season: string) => {
