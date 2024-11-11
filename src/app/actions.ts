@@ -13,6 +13,7 @@ export const getCurrentRound = async () => {
   const year = date.getFullYear()
 
   const currentYearSeason = month > 6 ? year : year - 1
+
   // Get only the last two digits of the year
   const currentYearSeasonShort = Number(currentYearSeason.toString().slice(-2))
   const season = `${currentYearSeasonShort}-${currentYearSeasonShort + 1}`
@@ -507,6 +508,7 @@ export async function login (state: FormState, formData: FormData) {
     }
   }
 
+  // Workaround, altogether with the Supabase email verification skip, to avoid the need of a real email. Only for local deployment with preset users.
   const data = {
     email: `${validateFields.data.username}@login.local`,
     password: validateFields.data.password
@@ -523,7 +525,7 @@ export async function login (state: FormState, formData: FormData) {
     }
   }
 
-  redirect('/')
+  goToCurrentRound()
 }
 
 export const logout = async () => {
