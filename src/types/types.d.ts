@@ -19,3 +19,13 @@ export type LineupBuilderPlayer = {
   position: number
   playerStats: PlayerStats
 }
+
+export type FormState =
+  | {
+      errors?: {
+        username?: string[]
+        password?: string[]
+      }
+      message?: string
+    }
+  | undefined

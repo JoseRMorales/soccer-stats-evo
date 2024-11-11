@@ -22,7 +22,7 @@ const Standings = async ({
 
   return (
     <>
-      <Button variant="ghost" asChild className="text-2xl m-10">
+      <Button variant="outline" asChild className="text-xl m-10">
         <Link href={`/season/${season}/round/${round}`}>Current round</Link>
       </Button>
       <main className="flex flex-col items-center justify-center h-screen p-4">

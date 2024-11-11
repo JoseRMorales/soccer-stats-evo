@@ -2,8 +2,9 @@
 
 import { APIError } from '@/lib/errors'
 import { createClient } from '@/lib/supabase/server'
-import { MatchStats } from '@/types/types'
+import { FormState, MatchStats } from '@/types/types'
 import { redirect } from 'next/navigation'
+import { z } from 'zod'
 
 export const getCurrentRound = async () => {
   const date = new Date()
@@ -485,4 +486,49 @@ export const getStandings = async (season: string) => {
     .sort((a, b) => b.points - a.points)
 
   return standings
+}
+
+const LoginFormSchema = z.object({
+  username: z.string().trim().nonempty(),
+  password: z.string().nonempty()
+})
+
+export async function login (state: FormState, formData: FormData) {
+  const supabase = await createClient()
+
+  const validateFields = LoginFormSchema.safeParse({
+    username: formData.get('username'),
+    password: formData.get('password')
+  })
+
+  if (!validateFields.success) {
+    return {
+      errors: validateFields.error.flatten().fieldErrors
+    }
+  }
+
+  const data = {
+    email: `${validateFields.data.username}@login.local`,
+    password: validateFields.data.password
+  }
+
+  const { error } = await supabase.auth.signInWithPassword(data)
+
+  if (error) {
+    console.error(error)
+    return {
+      errors: {
+        password: [error.message]
+      }
+    }
+  }
+
+  redirect('/')
+}
+
+export const logout = async () => {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+
+  redirect('/login')
 }

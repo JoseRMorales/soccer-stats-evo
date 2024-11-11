@@ -6,6 +6,5 @@
 
 ## TODDs
 
-- [ ] Auth
 - [ ] Local deployment
 - [ ] Avatar images
