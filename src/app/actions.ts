@@ -2,10 +2,11 @@
 
 import { APIError } from '@/lib/errors'
 import { createClient } from '@/lib/supabase/server'
-import { MatchStats } from '@/types/types'
+import { FormState, MatchStats } from '@/types/types'
 import { redirect } from 'next/navigation'
+import { z } from 'zod'
 
-export const goToCurrentRound = async () => {
+export const getCurrentRound = async () => {
   const date = new Date()
   const month = date.getMonth()
   const day = date.getDate()
@@ -39,7 +40,18 @@ export const goToCurrentRound = async () => {
     )
   })
 
-  redirect(`/${season}/${match?.round}`)
+  const round = match?.round
+
+  return {
+    season,
+    round
+  }
+}
+
+export const goToCurrentRound = async () => {
+  const { season, round } = await getCurrentRound()
+
+  redirect(`/season/${season}/round/${round}`)
 }
 
 export const getMatchTeams = async (season: string, round: number) => {
@@ -432,4 +444,91 @@ export const isMatchPlayed = async (season: string, round: number) => {
   }
 
   return data?.played
+}
+
+export const getAllRounds = async () => {
+  const client = await createClient()
+  const { data, error } = await client.from('Matches').select(
+    `
+    season,
+    round
+    `
+  )
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  return data
+}
+
+export const getStandings = async (season: string) => {
+  const client = await createClient()
+  const { data, error } = await client.rpc('get_standing', {
+    season_input: season
+  })
+
+  if (error) {
+    console.error(error)
+    throw new APIError(error.message)
+  }
+
+  const standings = data
+    .map((team) => {
+      const points = team.won * 3 + team.drawn * 1
+
+      return {
+        ...team,
+        points
+      }
+    })
+    .sort((a, b) => b.points - a.points)
+
+  return standings
+}
+
+const LoginFormSchema = z.object({
+  username: z.string().trim().nonempty(),
+  password: z.string().nonempty()
+})
+
+export async function login (state: FormState, formData: FormData) {
+  const supabase = await createClient()
+
+  const validateFields = LoginFormSchema.safeParse({
+    username: formData.get('username'),
+    password: formData.get('password')
+  })
+
+  if (!validateFields.success) {
+    return {
+      errors: validateFields.error.flatten().fieldErrors
+    }
+  }
+
+  const data = {
+    email: `${validateFields.data.username}@login.local`,
+    password: validateFields.data.password
+  }
+
+  const { error } = await supabase.auth.signInWithPassword(data)
+
+  if (error) {
+    console.error(error)
+    return {
+      errors: {
+        password: [error.message]
+      }
+    }
+  }
+
+  redirect('/')
+}
+
+export const logout = async () => {
+  const supabase = await createClient()
+  await supabase.auth.signOut()
+
+  redirect('/login')
 }

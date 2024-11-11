@@ -60,3 +60,6 @@ const GamePage = async ({
 }
 
 export default GamePage
+
+export const dynamic = 'force-static'
+export const revalidate = 3600

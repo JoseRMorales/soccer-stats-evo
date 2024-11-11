@@ -6,7 +6,5 @@
 
 ## TODDs
 
-- [ ] Static site generation
-- [ ] Lineup builder
-- [ ] Classification
 - [ ] Local deployment
+- [ ] Avatar images
