@@ -14,5 +14,6 @@ Mobile friendly.
 
 ## TODOs
 
+- [ ] Demo
 - [ ] Local deployment
 - [ ] Avatar images

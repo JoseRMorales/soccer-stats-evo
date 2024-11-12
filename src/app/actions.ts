@@ -529,7 +529,7 @@ export async function login (state: FormState, formData: FormData) {
     }
   }
 
-  goToCurrentRound()
+  await goToCurrentRound()
 }
 
 export const logout = async () => {
