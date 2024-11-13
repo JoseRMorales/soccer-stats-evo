@@ -25,11 +25,14 @@ Manage your team's stats via Supabase dashboard, and display them on your NextJS
 ![{E6BFACB0-626E-4CE0-A88B-5C3A45F2459D}](https://github.com/user-attachments/assets/10126cd6-4618-4a0d-83d5-422fafe533bd)
 
 
+Mobile friendly.
+
 ## Attributions
 
 [Default User Vectors by Vecteezy](https://www.vecteezy.com/free-vector/default-user)
 
-## TODDs
+## TODOs
 
+- [ ] Demo
 - [ ] Local deployment
 - [ ] Avatar images
