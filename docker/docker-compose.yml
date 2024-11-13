@@ -1,0 +1,14 @@
+name: soccer-stats
+
+services:
+  soccer-stats:
+    image: ghcr.io/josermorales/soccer-stats:main
+    container_name: soccer-stats
+    ports:
+      - "3000:3000"
+    # environment:
+      # - PORT=3000
+      # - SUPABASE_URL=https://<supabase-url>.supabase.co
+      # - SUPABASE_ANON_KEY=<supabase-anon-key>
+    env_file:
+      - .env
