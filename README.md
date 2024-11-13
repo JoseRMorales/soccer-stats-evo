@@ -31,8 +31,13 @@ Mobile friendly.
 
 [Default User Vectors by Vecteezy](https://www.vecteezy.com/free-vector/default-user)
 
+## Demo
+
+- User: demo
+- Password: demo
+
+https://soccer-stats-six.vercel.app/
+
 ## TODOs
 
-- [ ] Demo
-- [ ] Local deployment
 - [ ] Avatar images
