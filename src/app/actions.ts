@@ -1,9 +1,11 @@
 'use server'
 
+import { createClient } from '@/lib/appwrite/server'
 import { APIError } from '@/lib/errors'
-import { createClient } from '@/lib/supabase/server'
 import { FormState, MatchStats } from '@/types/types'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { Client } from 'node-appwrite'
 import { z } from 'zod'
 
 export const getCurrentRound = async () => {
@@ -499,7 +501,7 @@ const LoginFormSchema = z.object({
 })
 
 export async function login (state: FormState, formData: FormData) {
-  const supabase = await createClient()
+  const appwrite = await createClient()
 
   const validateFields = LoginFormSchema.safeParse({
     username: formData.get('username'),
@@ -518,16 +520,28 @@ export async function login (state: FormState, formData: FormData) {
     password: validateFields.data.password
   }
 
-  const { error } = await supabase.auth.signInWithPassword(data)
-
-  if (error) {
+  try {
+    const session = await appwrite.account.createEmailPasswordSession(
+      data.email,
+      data.password
+    )
+    const cookiesData = await cookies()
+    cookiesData.set('appwrite-session', session.secret, {
+      path: '/',
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: true
+    })
+  } catch (error) {
     console.error(error)
     return {
       errors: {
-        password: [error.message]
+        password: [error]
       }
     }
   }
+
+  // Save the session in the cookie
 
   await goToCurrentRound()
 }
