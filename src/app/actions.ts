@@ -1,11 +1,11 @@
 'use server'
 
-import { createClient } from '@/lib/appwrite/server'
+import { createClient, createDatabaseClient } from '@/lib/appwrite/server'
 import { APIError } from '@/lib/errors'
 import { FormState, MatchStats } from '@/types/types'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { Client } from 'node-appwrite'
+import { AppwriteException, Client, Query } from 'node-appwrite'
 import { z } from 'zod'
 
 export const getCurrentRound = async () => {
@@ -20,23 +20,28 @@ export const getCurrentRound = async () => {
   const currentYearSeasonShort = Number(currentYearSeason.toString().slice(-2))
   const season = `${currentYearSeasonShort}-${currentYearSeasonShort + 1}`
 
-  const client = await createClient()
-  const { data, error } = await client
-    .from('Matches')
-    .select('round, date')
-    .eq('season', season)
-
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  const client = await createDatabaseClient()
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Matches',
+      [Query.equal('season', season)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  const reversedMatches = data?.reverse()
+  const reversedMatches = data.documents.reverse() as Database['Matches'][]
 
   // Find the first match that has already been played
   const match = reversedMatches?.find((match) => {
-    if (!match.date) return false
-    const matchDate = new Date(match.date)
+    if (!match.datetime) return false
+    const matchDate = new Date(match.datetime)
     return (
       matchDate.getMonth() < month ||
       (matchDate.getMonth() === month && matchDate.getDate() <= day)
