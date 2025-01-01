@@ -8,6 +8,7 @@
     "database.types.ts"
   ],
   "rules": {
+    "@next/next/no-img-element": "off",
     "no-var": "warn",
     "object-shorthand": [
       "warn",

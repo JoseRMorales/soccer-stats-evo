@@ -1,9 +1,9 @@
-name: soccer-stats
+name: soccer-stats-evo
 
 services:
   soccer-stats:
-    image: ghcr.io/josermorales/soccer-stats:main
-    container_name: soccer-stats
+    image: ghcr.io/josermorales/soccer-stats-evo:main
+    container_name: soccer-stats-evo
     ports:
       - "3000:3000"
     # environment:
