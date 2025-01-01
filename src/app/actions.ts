@@ -1,17 +1,21 @@
 'use server'
 
-import { createClient, createDatabaseClient } from '@/lib/appwrite/server'
+import {
+  createClient,
+  createDatabaseClient,
+  createSessionClient
+} from '@/lib/appwrite/server'
 import { APIError } from '@/lib/errors'
-import { FormState, MatchStats } from '@/types/types'
+import { Database } from '@/types/database.types'
+import { FormState, MatchStats, PlayerStats } from '@/types/types'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { AppwriteException, Client, Query } from 'node-appwrite'
+import { AppwriteException, Query } from 'node-appwrite'
 import { z } from 'zod'
 
 export const getCurrentRound = async () => {
   const date = new Date()
   const month = date.getMonth()
-  const day = date.getDate()
   const year = date.getFullYear()
 
   const currentYearSeason = month > 6 ? year : year - 1
@@ -40,12 +44,7 @@ export const getCurrentRound = async () => {
 
   // Find the first match that has already been played
   const match = reversedMatches?.find((match) => {
-    if (!match.datetime) return false
-    const matchDate = new Date(match.datetime)
-    return (
-      matchDate.getMonth() < month ||
-      (matchDate.getMonth() === month && matchDate.getDate() <= day)
-    )
+    return match.played
   })
 
   const round = match?.round
@@ -63,43 +62,49 @@ export const goToCurrentRound = async () => {
 }
 
 export const getMatchTeams = async (season: string, round: number) => {
-  const client = await createClient()
-  const { data, error } = await client
-    .from('Teams')
-    .select('name')
-    .eq('owner', true)
-    .single()
-
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  const client = await createDatabaseClient()
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Teams',
+      [Query.equal('owner', true), Query.limit(1)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  const ownerTeam = data?.name
+  const teams = data.documents as Database['Teams'][]
+  const ownerTeam = teams[0].name
 
-  const { data: matchesData, error: matchesError } = await client
-    .from('Matches')
-    .select(
-      `
-    goals_scored,
-    goals_conceded,
-    ...Teams!inner(
-      name
+  let matchesData
+  try {
+    matchesData = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Matches',
+      [
+        Query.equal('season', season),
+        Query.equal('round', round),
+        Query.limit(1)
+      ]
     )
-    `
-    )
-    .eq('season', season)
-    .eq('round', round)
-    .single()
-
-  if (matchesError) {
-    console.error(matchesError)
-    throw new APIError(matchesError.message)
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  const opponentTeam = matchesData?.name
-  const scoredGoals = matchesData?.goals_scored
-  const concededGoals = matchesData?.goals_conceded
+  const match = matchesData.documents[0] as Database['Matches']
+
+  const opponentTeam = match.opponent.name
+  const scoredGoals = match.goals_scored
+  const concededGoals = match.goals_conceded
 
   return {
     ownerTeam,
@@ -110,389 +115,659 @@ export const getMatchTeams = async (season: string, round: number) => {
 }
 
 export const getMatchScorers = async (season: string, round: number) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_match_scorers', {
-    input_round: round,
-    input_season: season
-  })
+  const client = await createDatabaseClient()
+  let data
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Goals',
+      [Query.equal('season', season), Query.equal('round', round)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data
+  const goals = data.documents as Database['Goals'][]
+  const scorers = await Promise.all(
+    goals.map(async (goal) => {
+      const playerInfo = await getPlayerInfo(season, goal.player)
+      return {
+        player: playerInfo.name,
+        goals: goal.amount
+      }
+    })
+  )
+
+  return scorers
 }
 
 export const getMatchAssists = async (season: string, round: number) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_match_assists', {
-    input_round: round,
-    input_season: season
-  })
+  const client = await createDatabaseClient()
+  let data
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Assists',
+      [Query.equal('season', season), Query.equal('round', round)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data
+  const assists = data.documents as Database['Assists'][]
+  const assisters = await Promise.all(
+    assists.map(async (assist) => {
+      const playerInfo = await getPlayerInfo(season, assist.player)
+      return {
+        player: playerInfo.name,
+        assists: assist.amount
+      }
+    })
+  )
+
+  return assisters
 }
 
 export const getMatchYellowCards = async (season: string, round: number) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_match_yellow_cards', {
-    input_round: round,
-    input_season: season
-  })
+  const client = await createDatabaseClient()
+  let data
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'YellowCards',
+      [Query.equal('season', season), Query.equal('round', round)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data
+  const yellowCards = data.documents as Database['YellowCards'][]
+  const yellowCardPlayers = await Promise.all(
+    yellowCards.map(async (yellowCard) => {
+      const playerInfo = await getPlayerInfo(season, yellowCard.player)
+      return {
+        player: playerInfo.name,
+        yellowCards: yellowCard.amount
+      }
+    })
+  )
+
+  return yellowCardPlayers
 }
 
 export const getMatchRedCards = async (season: string, round: number) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_match_red_cards', {
-    input_round: round,
-    input_season: season
-  })
+  const client = await createDatabaseClient()
+  let data
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'RedCards',
+      [Query.equal('season', season), Query.equal('round', round)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data
-}
+  const redCards = data.documents as Database['RedCards'][]
+  const redCardPlayers = await Promise.all(
+    redCards.map(async (redCard) => {
+      const playerInfo = await getPlayerInfo(season, redCard.player)
+      return {
+        player: playerInfo.name
+      }
+    })
+  )
 
-export const getMatchLineup = async (season: string, round: number) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_match_lineup', {
-    input_round: round,
-    input_season: season
-  })
-
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
-  }
-
-  return data
+  return redCardPlayers
 }
 
 export const getPlayerInfo = async (season: string, playerNumber: number) => {
-  const client = await createClient()
-  const { data, error } = await client
-    .from('Players')
-    .select('name')
-    .eq('season', season)
-    .eq('number', playerNumber)
-    .single()
+  const client = await createDatabaseClient()
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Players',
+      [
+        Query.and([
+          Query.equal('season', season),
+          Query.equal('number', playerNumber)
+        ])
+      ]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data
+  return data.documents[0] as Database['Players']
 }
 
 export const getNextRound = async (season: string, round: number) => {
-  const client = await createClient()
-  const { data, error } = await client
-    .from('Matches')
-    .select('round')
-    .eq('round', round + 1)
-    .eq('season', season)
-    .maybeSingle()
-
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  const client = await createDatabaseClient()
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Matches',
+      [
+        Query.equal('season', season),
+        Query.equal('round', round + 1),
+        Query.limit(1)
+      ]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data ? round + 1 : null
+  return data.documents[0]?.round
 }
 
 export const getPlayedMatches = async (
   season: string,
   playerNumber: number
 ) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_played_games', {
-    input_season: season,
-    input_player: playerNumber
-  })
+  const client = await createDatabaseClient()
+  let playedMatchesData
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  try {
+    playedMatchesData = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Lineups',
+      [
+        Query.and([
+          Query.equal('season', season),
+          Query.equal('player', playerNumber)
+        ])
+      ]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
-
-  return data[0].played_matches
+  return playedMatchesData.documents.length
 }
 
 export const getGoalsNumber = async (season: string, playerNumber: number) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_goals_number', {
-    input_season: season,
-    input_player: playerNumber
-  })
+  const client = await createDatabaseClient()
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  let totalGoalsData
+  try {
+    totalGoalsData = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Goals',
+      [
+        Query.and([
+          Query.equal('season', season),
+          Query.equal('player', playerNumber)
+        ])
+      ]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data[0].goals || 0
+  const totalGoals = totalGoalsData.documents.reduce(
+    (acc, goal) => acc + goal.amount,
+    0
+  )
+  return totalGoals
 }
 
 export const getAssistsNumber = async (
   season: string,
   playerNumber: number
 ) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_assists_number', {
-    input_season: season,
-    input_player: playerNumber
-  })
+  const client = await createDatabaseClient()
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  let totalAssistsData
+  try {
+    totalAssistsData = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Assists',
+      [
+        Query.and([
+          Query.equal('season', season),
+          Query.equal('player', playerNumber)
+        ])
+      ]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
-  return data[0].assists || 0
+
+  const totalAssists = totalAssistsData.documents.reduce(
+    (acc, assist) => acc + assist.amount,
+    0
+  )
+
+  return totalAssists
 }
 
 export const getYellowCardsNumber = async (
   season: string,
   playerNumber: number
 ) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_yellow_cards_number', {
-    input_season: season,
-    input_player: playerNumber
-  })
+  const client = await createDatabaseClient()
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  let totalYellowCardsData
+  try {
+    totalYellowCardsData = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'YellowCards',
+      [
+        Query.and([
+          Query.equal('season', season),
+          Query.equal('player', playerNumber)
+        ])
+      ]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data[0].yellow_cards || 0
+  const totalYellowCards = totalYellowCardsData.documents.reduce(
+    (acc, yellowCard) => acc + yellowCard.amount,
+    0
+  )
+
+  return totalYellowCards
 }
 
 export const getRedCardsNumber = async (
   season: string,
   playerNumber: number
 ) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_red_cards_number', {
-    input_season: season,
-    input_player: playerNumber
-  })
+  const client = await createDatabaseClient()
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  let redCardsData
+  try {
+    redCardsData = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'RedCards',
+      [
+        Query.and([
+          Query.equal('season', season),
+          Query.equal('player', playerNumber)
+        ])
+      ]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data[0].red_cards || 0
+  const redCards = redCardsData.documents as Database['RedCards'][]
+
+  return redCards.length
 }
 
 export const getPenaltiesSaved = async (
   season: string,
   playerNumber: number
 ): Promise<[number, number]> => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_penalties_saved', {
-    input_season: season,
-    input_player: playerNumber
-  })
-
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  const client = await createDatabaseClient()
+  let totalPenaltiesSavedData
+  try {
+    totalPenaltiesSavedData = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'PenaltiesAgainst',
+      [
+        Query.and([
+          Query.equal('season', season),
+          Query.equal('player', playerNumber)
+        ])
+      ]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return [data[0].saved_penalties || 0, data[0].total_penalties || 0]
+  const totalPenaltiesSaved = totalPenaltiesSavedData.documents.reduce(
+    (acc, penalty) => acc + penalty.amount,
+    0
+  )
+
+  const totalPenalties = totalPenaltiesSavedData.documents.reduce(
+    (acc, penalty) => acc + penalty.total,
+    0
+  )
+
+  return [totalPenaltiesSaved, totalPenalties]
 }
 
 export const getPlayerStats = async (season: string, playerNumber: number) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_player_stats', {
-    season_input: season,
-    player_number: playerNumber
-  })
+  const playedMatches = await getPlayedMatches(season, playerNumber)
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
-  }
+  const totalGoals = await getGoalsNumber(season, playerNumber)
 
-  return data?.[0]
+  const totalAssists = await getAssistsNumber(season, playerNumber)
+
+  const totalYellowCards = await getYellowCardsNumber(season, playerNumber)
+
+  const totalRedCards = await getRedCardsNumber(season, playerNumber)
+
+  const [totalPenaltiesSaved, totalPenalties] = await getPenaltiesSaved(
+    season,
+    playerNumber
+  )
+
+  return {
+    season,
+    player_name: (await getPlayerInfo(season, playerNumber)).name,
+    played_matches: playedMatches,
+    total_goals: totalGoals,
+    total_assists: totalAssists,
+    total_penalties: totalPenalties,
+    total_penalties_saved: totalPenaltiesSaved,
+    total_red_cards: totalRedCards,
+    total_yellow_cards: totalYellowCards
+  } as PlayerStats
 }
 
 export const getMatchStats = async (
   season: string,
   round: number
 ): Promise<MatchStats> => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_match_stats', {
-    input_round: round,
-    input_season: season
-  })
-
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  const client = await createDatabaseClient()
+  let goalsData
+  try {
+    goalsData = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Goals',
+      [Query.equal('season', season), Query.equal('round', round)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  const goals = data.filter((stat) => stat.stat_type === 'goal')
-  const assists = data.filter((stat) => stat.stat_type === 'assist')
-  const yellowCards = data.filter((stat) => stat.stat_type === 'yellow_card')
-  const redCards = data.filter((stat) => stat.stat_type === 'red_card')
+  const goals = goalsData.documents as Database['Goals'][]
+  const goalStats = goals.map(async (goal) => {
+    const playerInfo = await getPlayerInfo(season, goal.player)
+    return {
+      player_name: playerInfo.name,
+      player_number: goal.player,
+      goals: goal.amount
+    }
+  })
+
+  let assistsData
+  try {
+    assistsData = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Assists',
+      [Query.equal('season', season), Query.equal('round', round)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
+  }
+
+  const assists = assistsData.documents as Database['Assists'][]
+  const assistStats = assists.map(async (assist) => {
+    const playerInfo = await getPlayerInfo(season, assist.player)
+    return {
+      player_name: playerInfo.name,
+      player_number: assist.player,
+      assists: assist.amount
+    }
+  })
+
+  let yellowCardsData
+  try {
+    yellowCardsData = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'YellowCards',
+      [Query.equal('season', season), Query.equal('round', round)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
+  }
+
+  const yellowCards = yellowCardsData.documents as Database['YellowCards'][]
+  const yellowCardStats = yellowCards.map(async (yellowCard) => {
+    const playerInfo = await getPlayerInfo(season, yellowCard.player)
+    return {
+      player_name: playerInfo.name,
+      player_number: yellowCard.player,
+      yellow_cards: yellowCard.amount
+    }
+  })
+
+  let redCardsData
+
+  try {
+    redCardsData = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'RedCards',
+      [Query.equal('season', season), Query.equal('round', round)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
+  }
+
+  const redCards = redCardsData.documents as Database['RedCards'][]
+  const redCardStats = redCards.map(async (redCard) => {
+    const playerInfo = await getPlayerInfo(season, redCard.player)
+    return {
+      player_name: playerInfo.name,
+      player_number: redCard.player
+    }
+  })
 
   return {
-    goals,
-    assists,
-    yellowCards,
-    redCards
+    goals: await Promise.all(goalStats),
+    assists: await Promise.all(assistStats),
+    yellowCards: await Promise.all(yellowCardStats),
+    redCards: await Promise.all(redCardStats)
   }
 }
 
 export const getStarters = async (season: string, round: number) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_starters', {
-    input_season: season,
-    input_round: round
-  })
-
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  const client = await createDatabaseClient()
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Lineups',
+      [Query.equal('season', season), Query.equal('round', round)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data
+  const lineupData = data.documents as Database['Lineups'][]
+  const starters = lineupData.filter((player) => player.position !== -1)
+
+  return starters
 }
 
 export const getBench = async (season: string, round: number) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_bench', {
-    input_season: season,
-    input_round: round
-  })
-
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  const client = await createDatabaseClient()
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Lineups',
+      [Query.equal('season', season), Query.equal('round', round)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data
+  const lineupData = data.documents as Database['Lineups'][]
+  const bench = lineupData.filter((player) => player.position === -1)
+
+  return bench
 }
 
 export const getMatchDate = async (season: string, round: number) => {
-  const client = await createClient()
-  const { data, error } = await client
-    .from('Matches')
-    .select(
-      `
-    date,
-    time
-    `
-    )
-    .eq('season', season)
-    .eq('round', round)
-    .single()
+  const client = await createDatabaseClient()
+  let data
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Matches',
+      [Query.and([Query.equal('season', season), Query.equal('round', round)])]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  const date = data?.date
-  const time = data?.time
+  const match = data.documents[0] as Database['Matches']
+  const datetime = match.datetime
 
-  if (!date || !time) return null
-
-  if (!time) return new Date(date)
-
-  const dateTime = new Date(`${date}T${time}`)
-
-  return dateTime
+  return new Date(datetime)
 }
 
 export const getPlayers = async (season: string) => {
-  const client = await createClient()
-  const { data, error } = await client
-    .from('Players')
-    .select('name, number')
-    .eq('season', season)
-
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  const client = await createDatabaseClient()
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Players',
+      [Query.equal('season', season)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data
+  const players = data.documents as Database['Players'][]
+
+  return players
 }
 
 export const isMatchPlayed = async (season: string, round: number) => {
-  const client = await createClient()
-  const { data, error } = await client
-    .from('Matches')
-    .select('played')
-    .eq('season', season)
-    .eq('round', round)
-    .single()
+  const client = await createDatabaseClient()
 
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Matches',
+      [Query.and([Query.equal('season', season), Query.equal('round', round)])]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
 
-  return data?.played
-}
+  const match = data.documents[0] as Database['Matches']
 
-export const getAllRounds = async () => {
-  const client = await createClient()
-  const { data, error } = await client.from('Matches').select(
-    `
-    season,
-    round
-    `
-  )
-
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
-  }
-
-  return data
+  return match.played
 }
 
 export const getStandings = async (season: string) => {
-  const client = await createClient()
-  const { data, error } = await client.rpc('get_standing', {
-    season_input: season
-  })
-
-  if (error) {
-    console.error(error)
-    throw new APIError(error.message)
+  const client = await createDatabaseClient()
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Standings',
+      [Query.equal('season', season)]
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
+  const teams = data.documents as Database['Standings'][]
 
-  const standings = data
+  const standings = teams
     .map((team) => {
       const points = team.won * 3 + team.drawn * 1
-
       return {
         ...team,
-        points
+        points,
+        name: team.team.name
       }
     })
     .sort((a, b) => b.points - a.points)
@@ -505,7 +780,7 @@ const LoginFormSchema = z.object({
   password: z.string().nonempty()
 })
 
-export async function login (state: FormState, formData: FormData) {
+export async function login (currentState: FormState, formData: FormData) {
   const appwrite = await createClient()
 
   const validateFields = LoginFormSchema.safeParse({
@@ -519,7 +794,7 @@ export async function login (state: FormState, formData: FormData) {
     }
   }
 
-  // Workaround, altogether with the Supabase email verification skip, to avoid the need of a real email. Only for local deployment with preset users.
+  // Workaround, altogether with the backend email verification skip, to avoid the need of a real email. Only for local deployment with preset users.
   const data = {
     email: `${validateFields.data.username}@login.local`,
     password: validateFields.data.password
@@ -538,22 +813,30 @@ export async function login (state: FormState, formData: FormData) {
       secure: true
     })
   } catch (error) {
-    console.error(error)
-    return {
-      errors: {
-        password: [error]
+    if (error instanceof AppwriteException) {
+      return {
+        errors: {
+          username: [error.message]
+        }
+      }
+    } else {
+      return {
+        errors: {
+          username: ['An unknown error occurred while logging in']
+        }
       }
     }
   }
-
-  // Save the session in the cookie
 
   await goToCurrentRound()
 }
 
 export const logout = async () => {
-  const supabase = await createClient()
-  await supabase.auth.signOut()
+  const { account } = await createSessionClient()
+  const cookiesData = await cookies()
+  cookiesData.delete('appwrite-session')
+
+  await account.deleteSession('current')
 
   redirect('/login')
 }

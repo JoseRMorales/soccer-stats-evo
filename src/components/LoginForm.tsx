@@ -11,10 +11,18 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useFormState, useFormStatus } from 'react-dom'
+import { useActionState } from 'react'
+import { useFormStatus } from 'react-dom'
+
+const initialState = {
+  errors: {
+    username: [] as string[],
+    password: [] as string[]
+  }
+}
 
 export function LoginForm () {
-  const [state, action] = useFormState(login, undefined)
+  const [state, action] = useActionState(login, initialState)
 
   return (
     <form action={action}>

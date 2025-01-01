@@ -1,19 +1,32 @@
-import { Database } from '@/types/database.types'
+export interface PlayerStats {
+  season: string
+  player_name: string
+  played_matches: number
+  total_goals: number
+  total_assists: number
+  total_penalties: number
+  total_penalties_saved: number
+  total_red_cards: number
+  total_yellow_cards: number
+}
 
-export type PlayerStats =
-  Database['public']['Functions']['get_player_stats']['Returns'][0]
+export interface MatchStat {
+  player_name: string
+  player_number: number
+  goals?: number
+  assists?: number
+  yellow_cards?: number
+  red_cards?: number
+}
 
-export type MatchStat =
-  Database['public']['Functions']['get_match_stats']['Returns'][0]
-
-export type MatchStats = {
+export interface MatchStats {
   goals: MatchStat[]
   assists: MatchStat[]
   yellowCards: MatchStat[]
   redCards: MatchStat[]
 }
 
-export type LineupBuilderPlayer = {
+export interface LineupBuilderPlayer {
   name: string
   number: number
   position: number
@@ -26,6 +39,5 @@ export type FormState =
         username?: string[]
         password?: string[]
       }
-      message?: string
     }
   | undefined

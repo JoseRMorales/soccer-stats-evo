@@ -10,7 +10,7 @@ export async function updateSession (request: NextRequest) {
     const appwrite = await createSessionClient()
     user = await appwrite.account.get()
   } catch (error) {
-    console.error(error)
+    console.info('No session. Redirect.')
   }
 
   if (

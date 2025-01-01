@@ -15,11 +15,11 @@ const SoccerField = async ({
 
   const players = await Promise.all(
     starters.map(async (player) => {
-      const playerStats = await getPlayerStats(season, player.player_number)
+      const playerStats = await getPlayerStats(season, player.player)
 
       return {
         ...player,
-        starter: player.player_position !== -1,
+        starter: player.position !== -1,
         playerStats: {
           ...playerStats
         }
@@ -38,15 +38,15 @@ const SoccerField = async ({
       />
 
       {players.map((player) => {
-        const index = player.player_position - 1
+        const index = player.position - 1
         const { x, y } = positions[index]
         return (
           <PlayerCard
-            key={player.player_number}
+            key={player.player}
             x={x}
             y={y}
             starter={player.starter}
-            playerNumber={player.player_number}
+            playerNumber={player.player}
             playerStats={player.playerStats}
           />
         )

@@ -56,10 +56,10 @@ const GameStats = async ({
         <>
           <dl className="grid grid-cols-[repeat(2,auto)] gap-x-6 w-max mb-12 mx-auto text-xl p-4">
             {matchStats.goals.map((goal) => (
-              <React.Fragment key={goal.player_name}>
+              <React.Fragment key={goal.player_number}>
                 <dt className="flex space-x-1">
                   <IconBallFootball size={24} stroke={2} />
-                  {<span>{goal.goals > 1 ? `x${goal.goals}` : ''}</span>}
+                  {<span>{(goal.goals ?? 0) > 1 ? `x${goal.goals}` : ''}</span>}
                 </dt>
                 <dd className="text-right">
                   <span>{goal.player_name}</span>
@@ -74,7 +74,9 @@ const GameStats = async ({
                   <IconShoe size={24} stroke={2} />
                   {
                     <span>
-                      {assist.assists > 1 ? ` x${assist.assists}` : ''}
+                      {assist.assists && assist.assists > 1
+                        ? ` x${assist.assists}`
+                        : ''}
                     </span>
                   }
                 </dt>
@@ -91,7 +93,7 @@ const GameStats = async ({
                   <IconCardsFilled size={24} stroke={2} color="yellow" />
                   {
                     <span>
-                      {yellowCard.yellow_cards > 1
+                      {(yellowCard.yellow_cards ?? 0) > 1
                         ? ` x${yellowCard.yellow_cards}`
                         : ''}
                     </span>
