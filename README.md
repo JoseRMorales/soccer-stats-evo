@@ -32,7 +32,7 @@ Mobile friendly.
 ## Demo
 
 - User: demo
-- Password: demo
+- Password: demodemo
 
 https://soccer-stats-six.vercel.app/
 
