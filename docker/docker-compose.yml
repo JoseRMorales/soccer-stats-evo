@@ -2,13 +2,9 @@ name: soccer-stats-evo
 
 services:
   soccer-stats:
-    image: ghcr.io/josermorales/soccer-stats-evo:main
+    image: ghcr.io/josermorales/soccer-stats-evo:latest
     container_name: soccer-stats-evo
     ports:
       - "3000:3000"
-    # environment:
-      # - PORT=3000
-      # - SUPABASE_URL=https://<supabase-url>.supabase.co
-      # - SUPABASE_ANON_KEY=<supabase-anon-key>
     env_file:
       - .env
