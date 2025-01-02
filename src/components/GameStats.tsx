@@ -5,13 +5,13 @@ import { APIError } from '@/lib/errors'
 import {
   IconBallFootball,
   IconCardsFilled,
-  IconShoe
+  IconShoe,
 } from '@tabler/icons-react'
 import { redirect } from 'next/navigation'
 
 const GameStats = async ({
   season,
-  round
+  round,
 }: {
   season: string
   round: number
@@ -35,7 +35,7 @@ const GameStats = async ({
               day: 'numeric',
               year: 'numeric',
               hour: 'numeric',
-              minute: 'numeric'
+              minute: 'numeric',
             })}
         </h3>
         <h1 className="flex flex-col">

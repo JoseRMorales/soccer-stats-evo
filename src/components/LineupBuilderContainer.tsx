@@ -1,4 +1,4 @@
-import { getPlayers, getPlayerStats } from '@/app/actions'
+import { getPlayerStats, getPlayers } from '@/app/actions'
 import LineupBuilder from '@/components/LineupBuilder'
 
 const LineupBuilderContainer = async ({ season }: { season: string }) => {
@@ -23,8 +23,8 @@ const LineupBuilderContainer = async ({ season }: { season: string }) => {
             total_yellow_cards: 0,
             total_penalties_saved: 0,
             total_penalties: 0,
-            player_name: player.name
-          }
+            player_name: player.name,
+          },
         }
       }
 
@@ -32,10 +32,10 @@ const LineupBuilderContainer = async ({ season }: { season: string }) => {
         ...player,
         position,
         playerStats: {
-          ...playerStats
-        }
+          ...playerStats,
+        },
       }
-    })
+    }),
   )
 
   return <LineupBuilder players={playerStats} />

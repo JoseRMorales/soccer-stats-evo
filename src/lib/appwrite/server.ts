@@ -2,7 +2,7 @@
 import { cookies } from 'next/headers'
 import { Account, Client, Databases } from 'node-appwrite'
 
-export async function createSessionClient () {
+export async function createSessionClient() {
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_URL!)
     .setProject(process.env.APPWRITE_PROJECT_ID!)
@@ -16,13 +16,13 @@ export async function createSessionClient () {
   client.setSession(session.value)
 
   return {
-    get account () {
+    get account() {
       return new Account(client)
-    }
+    },
   }
 }
 
-export async function createClient () {
+export async function createClient() {
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_URL!)
     .setProject(process.env.APPWRITE_PROJECT_ID!)
@@ -30,13 +30,13 @@ export async function createClient () {
     .setSession('')
 
   return {
-    get account () {
+    get account() {
       return new Account(client)
-    }
+    },
   }
 }
 
-export async function createDatabaseClient () {
+export async function createDatabaseClient() {
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_URL!)
     .setProject(process.env.APPWRITE_PROJECT_ID!)

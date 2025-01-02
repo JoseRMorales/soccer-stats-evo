@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 const PlayerCardSkeleton = async ({
   x = 0,
   y = 0,
-  starter = true
+  starter = true,
 }: {
   x?: number
   y?: number
@@ -15,7 +15,7 @@ const PlayerCardSkeleton = async ({
     ? {
         left: `${x}%`,
         top: `${y}%`,
-        transformOrigin: 'center'
+        transformOrigin: 'center',
       }
     : {}
 
@@ -45,7 +45,7 @@ const PlayerCardSkeleton = async ({
                 backgroundImage: `url(${backgroundImage})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat'
+                backgroundRepeat: 'no-repeat',
               }}
             ></div>
           </div>

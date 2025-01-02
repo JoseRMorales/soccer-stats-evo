@@ -7,7 +7,7 @@ const SoccerFieldSkeleton = () => {
   const players = positions.map((_, index) => ({
     player_number: index + 1,
     player_position: index + 1,
-    starter: true
+    starter: true,
   }))
 
   return (

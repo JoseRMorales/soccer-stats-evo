@@ -13,10 +13,10 @@ const Bench = async ({ season, round }: { season: string; round: number }) => {
         ...player,
         starter: player.position !== -1,
         playerStats: {
-          ...playerStats
-        }
+          ...playerStats,
+        },
       }
-    })
+    }),
   )
 
   return (

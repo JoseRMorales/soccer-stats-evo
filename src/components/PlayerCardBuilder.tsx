@@ -5,12 +5,12 @@ import {
   CommandEmpty,
   CommandGroup,
   CommandItem,
-  CommandList
+  CommandList,
 } from '@/components/ui/command'
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger
+  PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { LineupBuilderPlayer } from '@/types/types'
@@ -22,7 +22,7 @@ const PlayerCard = ({
   y = 0,
   starter = true,
   player,
-  players
+  players,
 }: {
   x?: number
   y?: number
@@ -40,7 +40,7 @@ const PlayerCard = ({
     ? {
         left: `${x}%`,
         top: `${y}%`,
-        transformOrigin: 'center'
+        transformOrigin: 'center',
       }
     : {}
 
@@ -71,7 +71,7 @@ const PlayerCard = ({
                     backgroundImage: `url(${backgroundImage})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat'
+                    backgroundRepeat: 'no-repeat',
                   }}
                 ></div>
               </div>
@@ -110,8 +110,9 @@ const PlayerCard = ({
                       setCurrentPlayer(
                         players.find(
                           (player) =>
-                            `${player.number} - ${player.name}` === currentValue
-                        ) as LineupBuilderPlayer
+                            `${player.number} - ${player.name}` ===
+                            currentValue,
+                        ) as LineupBuilderPlayer,
                       )
                       setOpen(false)
                     }}
@@ -119,7 +120,7 @@ const PlayerCard = ({
                     <Check
                       className={cn(
                         'mr-2 h-4 w-4',
-                        currentPlayer === player ? 'opacity-100' : 'opacity-0'
+                        currentPlayer === player ? 'opacity-100' : 'opacity-0',
                       )}
                     />
                     {player.number} - {player.name}

@@ -18,7 +18,7 @@ const LineupBuilder = ({ players }: { players: LineupBuilderPlayer[] }) => {
             alt="Soccer Field"
             // Mask image linear gradient
             style={{
-              maskImage: 'linear-gradient(to top, black 80%, transparent)'
+              maskImage: 'linear-gradient(to top, black 80%, transparent)',
             }}
           />
 

@@ -4,7 +4,7 @@ import lineups from '@/lib/lineups'
 
 const SoccerField = async ({
   season,
-  round
+  round,
 }: {
   season: string
   round: number
@@ -21,10 +21,10 @@ const SoccerField = async ({
         ...player,
         starter: player.position !== -1,
         playerStats: {
-          ...playerStats
-        }
+          ...playerStats,
+        },
       }
-    })
+    }),
   )
 
   return (

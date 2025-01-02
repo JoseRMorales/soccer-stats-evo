@@ -3,7 +3,7 @@
 import {
   createClient,
   createDatabaseClient,
-  createSessionClient
+  createSessionClient,
 } from '@/lib/appwrite/server'
 import { APIError } from '@/lib/errors'
 import { Database } from '@/types/database.types'
@@ -30,7 +30,7 @@ export const getCurrentRound = async () => {
     data = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'Matches',
-      [Query.equal('season', season)]
+      [Query.equal('season', season)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -51,7 +51,7 @@ export const getCurrentRound = async () => {
 
   return {
     season,
-    round
+    round,
   }
 }
 
@@ -68,7 +68,7 @@ export const getMatchTeams = async (season: string, round: number) => {
     data = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'Teams',
-      [Query.equal('owner', true), Query.limit(1)]
+      [Query.equal('owner', true), Query.limit(1)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -89,8 +89,8 @@ export const getMatchTeams = async (season: string, round: number) => {
       [
         Query.equal('season', season),
         Query.equal('round', round),
-        Query.limit(1)
-      ]
+        Query.limit(1),
+      ],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -110,7 +110,7 @@ export const getMatchTeams = async (season: string, round: number) => {
     ownerTeam,
     opponentTeam,
     scoredGoals,
-    concededGoals
+    concededGoals,
   }
 }
 
@@ -122,7 +122,7 @@ export const getMatchScorers = async (season: string, round: number) => {
     data = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'Goals',
-      [Query.equal('season', season), Query.equal('round', round)]
+      [Query.equal('season', season), Query.equal('round', round)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -138,9 +138,9 @@ export const getMatchScorers = async (season: string, round: number) => {
       const playerInfo = await getPlayerInfo(season, goal.player)
       return {
         player: playerInfo.name,
-        goals: goal.amount
+        goals: goal.amount,
       }
-    })
+    }),
   )
 
   return scorers
@@ -154,7 +154,7 @@ export const getMatchAssists = async (season: string, round: number) => {
     data = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'Assists',
-      [Query.equal('season', season), Query.equal('round', round)]
+      [Query.equal('season', season), Query.equal('round', round)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -170,9 +170,9 @@ export const getMatchAssists = async (season: string, round: number) => {
       const playerInfo = await getPlayerInfo(season, assist.player)
       return {
         player: playerInfo.name,
-        assists: assist.amount
+        assists: assist.amount,
       }
-    })
+    }),
   )
 
   return assisters
@@ -186,7 +186,7 @@ export const getMatchYellowCards = async (season: string, round: number) => {
     data = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'YellowCards',
-      [Query.equal('season', season), Query.equal('round', round)]
+      [Query.equal('season', season), Query.equal('round', round)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -202,9 +202,9 @@ export const getMatchYellowCards = async (season: string, round: number) => {
       const playerInfo = await getPlayerInfo(season, yellowCard.player)
       return {
         player: playerInfo.name,
-        yellowCards: yellowCard.amount
+        yellowCards: yellowCard.amount,
       }
-    })
+    }),
   )
 
   return yellowCardPlayers
@@ -218,7 +218,7 @@ export const getMatchRedCards = async (season: string, round: number) => {
     data = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'RedCards',
-      [Query.equal('season', season), Query.equal('round', round)]
+      [Query.equal('season', season), Query.equal('round', round)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -233,9 +233,9 @@ export const getMatchRedCards = async (season: string, round: number) => {
     redCards.map(async (redCard) => {
       const playerInfo = await getPlayerInfo(season, redCard.player)
       return {
-        player: playerInfo.name
+        player: playerInfo.name,
       }
-    })
+    }),
   )
 
   return redCardPlayers
@@ -252,9 +252,9 @@ export const getPlayerInfo = async (season: string, playerNumber: number) => {
       [
         Query.and([
           Query.equal('season', season),
-          Query.equal('number', playerNumber)
-        ])
-      ]
+          Query.equal('number', playerNumber),
+        ]),
+      ],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -277,8 +277,8 @@ export const getNextRound = async (season: string, round: number) => {
       [
         Query.equal('season', season),
         Query.equal('round', round + 1),
-        Query.limit(1)
-      ]
+        Query.limit(1),
+      ],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -293,7 +293,7 @@ export const getNextRound = async (season: string, round: number) => {
 
 export const getPlayedMatches = async (
   season: string,
-  playerNumber: number
+  playerNumber: number,
 ) => {
   const client = await createDatabaseClient()
   let playedMatchesData
@@ -305,9 +305,9 @@ export const getPlayedMatches = async (
       [
         Query.and([
           Query.equal('season', season),
-          Query.equal('player', playerNumber)
-        ])
-      ]
+          Query.equal('player', playerNumber),
+        ]),
+      ],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -330,9 +330,9 @@ export const getGoalsNumber = async (season: string, playerNumber: number) => {
       [
         Query.and([
           Query.equal('season', season),
-          Query.equal('player', playerNumber)
-        ])
-      ]
+          Query.equal('player', playerNumber),
+        ]),
+      ],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -344,14 +344,14 @@ export const getGoalsNumber = async (season: string, playerNumber: number) => {
 
   const totalGoals = totalGoalsData.documents.reduce(
     (acc, goal) => acc + goal.amount,
-    0
+    0,
   )
   return totalGoals
 }
 
 export const getAssistsNumber = async (
   season: string,
-  playerNumber: number
+  playerNumber: number,
 ) => {
   const client = await createDatabaseClient()
 
@@ -363,9 +363,9 @@ export const getAssistsNumber = async (
       [
         Query.and([
           Query.equal('season', season),
-          Query.equal('player', playerNumber)
-        ])
-      ]
+          Query.equal('player', playerNumber),
+        ]),
+      ],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -377,7 +377,7 @@ export const getAssistsNumber = async (
 
   const totalAssists = totalAssistsData.documents.reduce(
     (acc, assist) => acc + assist.amount,
-    0
+    0,
   )
 
   return totalAssists
@@ -385,7 +385,7 @@ export const getAssistsNumber = async (
 
 export const getYellowCardsNumber = async (
   season: string,
-  playerNumber: number
+  playerNumber: number,
 ) => {
   const client = await createDatabaseClient()
 
@@ -397,9 +397,9 @@ export const getYellowCardsNumber = async (
       [
         Query.and([
           Query.equal('season', season),
-          Query.equal('player', playerNumber)
-        ])
-      ]
+          Query.equal('player', playerNumber),
+        ]),
+      ],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -411,7 +411,7 @@ export const getYellowCardsNumber = async (
 
   const totalYellowCards = totalYellowCardsData.documents.reduce(
     (acc, yellowCard) => acc + yellowCard.amount,
-    0
+    0,
   )
 
   return totalYellowCards
@@ -419,7 +419,7 @@ export const getYellowCardsNumber = async (
 
 export const getRedCardsNumber = async (
   season: string,
-  playerNumber: number
+  playerNumber: number,
 ) => {
   const client = await createDatabaseClient()
 
@@ -431,9 +431,9 @@ export const getRedCardsNumber = async (
       [
         Query.and([
           Query.equal('season', season),
-          Query.equal('player', playerNumber)
-        ])
-      ]
+          Query.equal('player', playerNumber),
+        ]),
+      ],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -450,7 +450,7 @@ export const getRedCardsNumber = async (
 
 export const getPenaltiesSaved = async (
   season: string,
-  playerNumber: number
+  playerNumber: number,
 ): Promise<[number, number]> => {
   const client = await createDatabaseClient()
   let totalPenaltiesSavedData
@@ -461,9 +461,9 @@ export const getPenaltiesSaved = async (
       [
         Query.and([
           Query.equal('season', season),
-          Query.equal('player', playerNumber)
-        ])
-      ]
+          Query.equal('player', playerNumber),
+        ]),
+      ],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -475,12 +475,12 @@ export const getPenaltiesSaved = async (
 
   const totalPenaltiesSaved = totalPenaltiesSavedData.documents.reduce(
     (acc, penalty) => acc + penalty.amount,
-    0
+    0,
   )
 
   const totalPenalties = totalPenaltiesSavedData.documents.reduce(
     (acc, penalty) => acc + penalty.total,
-    0
+    0,
   )
 
   return [totalPenaltiesSaved, totalPenalties]
@@ -499,7 +499,7 @@ export const getPlayerStats = async (season: string, playerNumber: number) => {
 
   const [totalPenaltiesSaved, totalPenalties] = await getPenaltiesSaved(
     season,
-    playerNumber
+    playerNumber,
   )
 
   return {
@@ -511,13 +511,13 @@ export const getPlayerStats = async (season: string, playerNumber: number) => {
     total_penalties: totalPenalties,
     total_penalties_saved: totalPenaltiesSaved,
     total_red_cards: totalRedCards,
-    total_yellow_cards: totalYellowCards
+    total_yellow_cards: totalYellowCards,
   } as PlayerStats
 }
 
 export const getMatchStats = async (
   season: string,
-  round: number
+  round: number,
 ): Promise<MatchStats> => {
   const client = await createDatabaseClient()
   let goalsData
@@ -525,7 +525,7 @@ export const getMatchStats = async (
     goalsData = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'Goals',
-      [Query.equal('season', season), Query.equal('round', round)]
+      [Query.equal('season', season), Query.equal('round', round)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -541,7 +541,7 @@ export const getMatchStats = async (
     return {
       player_name: playerInfo.name,
       player_number: goal.player,
-      goals: goal.amount
+      goals: goal.amount,
     }
   })
 
@@ -550,7 +550,7 @@ export const getMatchStats = async (
     assistsData = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'Assists',
-      [Query.equal('season', season), Query.equal('round', round)]
+      [Query.equal('season', season), Query.equal('round', round)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -566,7 +566,7 @@ export const getMatchStats = async (
     return {
       player_name: playerInfo.name,
       player_number: assist.player,
-      assists: assist.amount
+      assists: assist.amount,
     }
   })
 
@@ -575,7 +575,7 @@ export const getMatchStats = async (
     yellowCardsData = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'YellowCards',
-      [Query.equal('season', season), Query.equal('round', round)]
+      [Query.equal('season', season), Query.equal('round', round)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -591,7 +591,7 @@ export const getMatchStats = async (
     return {
       player_name: playerInfo.name,
       player_number: yellowCard.player,
-      yellow_cards: yellowCard.amount
+      yellow_cards: yellowCard.amount,
     }
   })
 
@@ -601,7 +601,7 @@ export const getMatchStats = async (
     redCardsData = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'RedCards',
-      [Query.equal('season', season), Query.equal('round', round)]
+      [Query.equal('season', season), Query.equal('round', round)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -616,7 +616,7 @@ export const getMatchStats = async (
     const playerInfo = await getPlayerInfo(season, redCard.player)
     return {
       player_name: playerInfo.name,
-      player_number: redCard.player
+      player_number: redCard.player,
     }
   })
 
@@ -624,7 +624,7 @@ export const getMatchStats = async (
     goals: await Promise.all(goalStats),
     assists: await Promise.all(assistStats),
     yellowCards: await Promise.all(yellowCardStats),
-    redCards: await Promise.all(redCardStats)
+    redCards: await Promise.all(redCardStats),
   }
 }
 
@@ -635,7 +635,7 @@ export const getStarters = async (season: string, round: number) => {
     data = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'Lineups',
-      [Query.equal('season', season), Query.equal('round', round)]
+      [Query.equal('season', season), Query.equal('round', round)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -658,7 +658,7 @@ export const getBench = async (season: string, round: number) => {
     data = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'Lineups',
-      [Query.equal('season', season), Query.equal('round', round)]
+      [Query.equal('season', season), Query.equal('round', round)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -682,7 +682,7 @@ export const getMatchDate = async (season: string, round: number) => {
     data = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'Matches',
-      [Query.and([Query.equal('season', season), Query.equal('round', round)])]
+      [Query.and([Query.equal('season', season), Query.equal('round', round)])],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -705,7 +705,7 @@ export const getPlayers = async (season: string) => {
     data = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'Players',
-      [Query.equal('season', season)]
+      [Query.equal('season', season)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -728,7 +728,7 @@ export const isMatchPlayed = async (season: string, round: number) => {
     data = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'Matches',
-      [Query.and([Query.equal('season', season), Query.equal('round', round)])]
+      [Query.and([Query.equal('season', season), Query.equal('round', round)])],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -750,7 +750,7 @@ export const getStandings = async (season: string) => {
     data = await client.listDocuments(
       process.env.APPWRITE_DATABASE_ID!,
       'Standings',
-      [Query.equal('season', season)]
+      [Query.equal('season', season)],
     )
   } catch (error) {
     if (error instanceof AppwriteException) {
@@ -767,7 +767,7 @@ export const getStandings = async (season: string) => {
       return {
         ...team,
         points,
-        name: team.team.name
+        name: team.team.name,
       }
     })
     .sort((a, b) => b.points - a.points)
@@ -777,53 +777,53 @@ export const getStandings = async (season: string) => {
 
 const LoginFormSchema = z.object({
   username: z.string().trim().nonempty(),
-  password: z.string().nonempty()
+  password: z.string().nonempty(),
 })
 
-export async function login (currentState: FormState, formData: FormData) {
+export async function login(_currentState: FormState, formData: FormData) {
   const appwrite = await createClient()
 
   const validateFields = LoginFormSchema.safeParse({
     username: formData.get('username'),
-    password: formData.get('password')
+    password: formData.get('password'),
   })
 
   if (!validateFields.success) {
     return {
-      errors: validateFields.error.flatten().fieldErrors
+      errors: validateFields.error.flatten().fieldErrors,
     }
   }
 
   // Workaround, altogether with the backend email verification skip, to avoid the need of a real email. Only for local deployment with preset users.
   const data = {
     email: `${validateFields.data.username}@login.local`,
-    password: validateFields.data.password
+    password: validateFields.data.password,
   }
 
   try {
     const session = await appwrite.account.createEmailPasswordSession(
       data.email,
-      data.password
+      data.password,
     )
     const cookiesData = await cookies()
     cookiesData.set('appwrite-session', session.secret, {
       path: '/',
       httpOnly: true,
       sameSite: 'strict',
-      secure: true
+      secure: true,
     })
   } catch (error) {
     if (error instanceof AppwriteException) {
       return {
         errors: {
-          username: [error.message]
-        }
+          username: [error.message],
+        },
       }
     } else {
       return {
         errors: {
-          username: ['An unknown error occurred while logging in']
-        }
+          username: ['An unknown error occurred while logging in'],
+        },
       }
     }
   }

@@ -1,9 +1,9 @@
 import { createSessionClient } from '@/lib/appwrite/server'
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
-export async function updateSession (request: NextRequest) {
+export async function updateSession(request: NextRequest) {
   const response = NextResponse.next({
-    request
+    request,
   })
   let user = null
   try {

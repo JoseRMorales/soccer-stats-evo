@@ -3,15 +3,15 @@ import Bench from '@/components/Bench'
 import GameStats from '@/components/GameStats'
 import Header from '@/components/Header'
 import LineupBuilderContainer from '@/components/LineupBuilderContainer'
+import SoccerField from '@/components/SoccerField'
 import BenchSkeleton from '@/components/skeletons/BenchSkeleton'
 import GameStatsSkeleton from '@/components/skeletons/GameStatsSkeleton'
 import HeaderSkeleton from '@/components/skeletons/HeaderSkeleton'
 import SoccerFieldSkeleton from '@/components/skeletons/SoccerFieldSkeleton'
-import SoccerField from '@/components/SoccerField'
 import { Suspense } from 'react'
 
 const GamePage = async ({
-  params
+  params,
 }: {
   params: Promise<{ season: string; round: string }>
 }) => {

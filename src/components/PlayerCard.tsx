@@ -3,7 +3,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import { PlayerStats } from '@/types/types'
 
@@ -12,7 +12,7 @@ const PlayerCard = async ({
   y = 0,
   starter = true,
   playerNumber,
-  playerStats
+  playerStats,
 }: {
   x?: number
   y?: number
@@ -26,7 +26,7 @@ const PlayerCard = async ({
     ? {
         left: `${x}%`,
         top: `${y}%`,
-        transformOrigin: 'center'
+        transformOrigin: 'center',
       }
     : {}
 
@@ -58,7 +58,7 @@ const PlayerCard = async ({
                     backgroundImage: `url(${backgroundImage})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat'
+                    backgroundRepeat: 'no-repeat',
                   }}
                 ></div>
               </div>

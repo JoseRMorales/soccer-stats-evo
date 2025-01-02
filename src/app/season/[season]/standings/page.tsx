@@ -7,12 +7,12 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from '@/components/ui/table'
 import Link from 'next/link'
 
 const Standings = async ({
-  params
+  params,
 }: {
   params: Promise<{ season: string }>
 }) => {
