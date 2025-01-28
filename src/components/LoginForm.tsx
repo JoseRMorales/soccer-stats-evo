@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 
@@ -62,7 +63,7 @@ const SubmitButton = () => {
 
   return (
     <Button type="submit" disabled={pending}>
-      Log In
+      {pending ? <LoadingSpinner /> : 'Login'}
     </Button>
   )
 }

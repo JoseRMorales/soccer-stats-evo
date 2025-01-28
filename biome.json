@@ -111,7 +111,8 @@
         "noUnsafeNegation": "error",
         "useDefaultSwitchClauseLast": "error",
         "useNamespaceKeyword": "error",
-        "useValidTypeof": "error"
+        "useValidTypeof": "error",
+        "noConsoleLog": "warn"
       }
     },
     "ignore": ["**/database.types.ts"]

@@ -19,7 +19,6 @@ const GamePage = async ({
   const roundNumber = Number(round)
 
   const matchPlayed = await isMatchPlayed(season, roundNumber)
-
   return (
     <div className="flex flex-col min-h-screen">
       <Suspense fallback={<HeaderSkeleton />}>
@@ -37,7 +36,7 @@ const GamePage = async ({
           {matchPlayed ? (
             <>
               {/* Starters section */}
-              <section className="flex justify-center items-center 2xl:h-screen h-fit py-4 w-full 2xl:px-16">
+              <section className="flex justify-center items-center py-4 w-full 2xl:px-16">
                 <Suspense fallback={<SoccerFieldSkeleton />}>
                   <SoccerField season={season} round={roundNumber} />
                 </Suspense>

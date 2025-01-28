@@ -119,6 +119,17 @@ interface RedCards {
   $collectionId: string
 }
 
+interface Seasons {
+  id: string
+  order: number
+  $id: string
+  $createdAt: string
+  $updatedAt: string
+  $permissions: any[]
+  $databaseId: string
+  $collectionId: string
+}
+
 export interface Database {
   Teams: Teams
   Matches: Matches
@@ -129,4 +140,5 @@ export interface Database {
   Assists: Assists
   YellowCards: YellowCards
   RedCards: RedCards
+  Seasons: Seasons
 }

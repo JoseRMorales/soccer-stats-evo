@@ -13,16 +13,31 @@ import { redirect } from 'next/navigation'
 import { AppwriteException, Query } from 'node-appwrite'
 import { z } from 'zod'
 
+export const getCurrentSeason = async () => {
+  const client = await createDatabaseClient()
+
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Seasons',
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
+  }
+
+  const seasons = data.documents as Database['Seasons'][]
+  const orderedSeasons = seasons.sort((a, b) => b.order - a.order)
+
+  return orderedSeasons[0].id
+}
+
 export const getCurrentRound = async () => {
-  const date = new Date()
-  const month = date.getMonth()
-  const year = date.getFullYear()
-
-  const currentYearSeason = month > 6 ? year : year - 1
-
-  // Get only the last two digits of the year
-  const currentYearSeasonShort = Number(currentYearSeason.toString().slice(-2))
-  const season = `${currentYearSeasonShort}-${currentYearSeasonShort + 1}`
+  const season = await getCurrentSeason()
 
   const client = await createDatabaseClient()
   let data
@@ -839,4 +854,25 @@ export const logout = async () => {
   await account.deleteSession('current')
 
   redirect('/login')
+}
+
+export const getSeasons = async () => {
+  const client = await createDatabaseClient()
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Seasons',
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
+  }
+
+  const seasons = data.documents as Database['Seasons'][]
+
+  return seasons
 }

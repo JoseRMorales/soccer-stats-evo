@@ -1,5 +1,19 @@
-import { getNextRound, logout } from '@/app/actions'
+import {
+  getCurrentRound,
+  getNextRound,
+  getSeasons,
+  logout,
+} from '@/app/actions'
 import { Button } from '@/components/ui/button'
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from '@/components/ui/navigation-menu'
 import { IconLogout2 } from '@tabler/icons-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
@@ -7,6 +21,22 @@ import Link from 'next/link'
 const Header = async ({ season, round }: { season: string; round: number }) => {
   const previousRound = round > 1 ? round - 1 : null
   const nextRound = await getNextRound(season, round)
+  const seasons = await getSeasons()
+  const currentRound = await getCurrentRound()
+
+  const navItems = seasons.map((availableSeason) => {
+    if (availableSeason.id === season) {
+      return {
+        title: `Season ${availableSeason.id}`,
+        href: `/season/${availableSeason.id}/round/${currentRound.round}`,
+      }
+    }
+
+    return {
+      title: `Season ${availableSeason.id}`,
+      href: `/season/${availableSeason.id}/round/1`,
+    }
+  })
 
   return (
     <nav className="w-full h-fit px-10 py-6 md:py-2 flex flex-col md:flex-row justify-between items-center space-y-4 mb-16">
@@ -17,7 +47,28 @@ const Header = async ({ season, round }: { season: string; round: number }) => {
         </Button>
       </form>
       <div className="flex flex-col items-center space-y-2">
-        <span className="text-2xl">Season {season}</span>
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <NavigationMenuTrigger className="w-[200px]">
+                Season {season}
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="flex flex-col text-center w-[200px]">
+                  {navItems.map((item) => (
+                    <Link
+                      href={item.href}
+                      key={item.href}
+                      className="hover:bg-accent hover:text-accent-foreground p-2 rounded-md w-full"
+                    >
+                      <span className="text-nowrap p-4">{item.title}</span>
+                    </Link>
+                  ))}
+                </ul>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
         <div className="text-center flex justify-center items-center space-x-4">
           {previousRound ? (
             <Button variant="ghost" size="icon" asChild>
