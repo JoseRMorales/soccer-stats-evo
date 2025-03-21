@@ -820,12 +820,14 @@ export async function login(_currentState: FormState, formData: FormData) {
       data.email,
       data.password,
     )
+    const sessionExpìres = new Date(session.expire)
     const cookiesData = await cookies()
     cookiesData.set('appwrite-session', session.secret, {
       path: '/',
       httpOnly: true,
       sameSite: 'strict',
       secure: true,
+      expires: sessionExpìres,
     })
   } catch (error) {
     if (error instanceof AppwriteException) {

@@ -18,8 +18,8 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'Soccer Stats App',
-  description: 'Soccer Stats App',
+  title: 'Soccer Stats Evo App',
+  description: 'Soccer Stats Evo App',
 }
 
 export default function RootLayout({
