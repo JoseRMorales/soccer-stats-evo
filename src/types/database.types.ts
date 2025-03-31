@@ -65,7 +65,7 @@ interface Lineups {
   $collectionId: string
 }
 
-type GoalType = 'InGame' | 'Penalty' | 'FreeKick'
+export type GoalType = 'InGame' | 'Penalty' | 'FreeKick'
 
 interface Goals {
   round: number

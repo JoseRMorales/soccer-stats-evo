@@ -1,7 +1,7 @@
 'use client'
 
 import { login } from '@/app/actions'
-import { Button } from '@/components/ui/button'
+import SubmitButton from '@/components/SubmitButton'
 import {
   Card,
   CardContent,
@@ -11,9 +11,7 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useActionState } from 'react'
-import { useFormStatus } from 'react-dom'
 
 const initialState = {
   errors: {
@@ -22,7 +20,7 @@ const initialState = {
   },
 }
 
-export function LoginForm() {
+const LoginForm = () => {
   const [state, action] = useActionState(login, initialState)
 
   return (
@@ -50,7 +48,7 @@ export function LoginForm() {
                 {state?.errors?.password && <p>{state.errors.password}</p>}
               </div>
             </div>
-            <SubmitButton />
+            <SubmitButton>Login</SubmitButton>
           </div>
         </CardContent>
       </Card>
@@ -58,12 +56,4 @@ export function LoginForm() {
   )
 }
 
-const SubmitButton = () => {
-  const { pending } = useFormStatus()
-
-  return (
-    <Button type="submit" disabled={pending}>
-      {pending ? <LoadingSpinner /> : 'Login'}
-    </Button>
-  )
-}
+export default LoginForm

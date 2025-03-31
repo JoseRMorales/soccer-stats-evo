@@ -44,3 +44,9 @@ export async function createDatabaseClient() {
 
   return new Databases(client)
 }
+
+export async function createDatabaseClientWithSession() {
+  const { account } = await createSessionClient()
+
+  return new Databases(account.client)
+}

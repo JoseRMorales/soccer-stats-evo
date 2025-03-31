@@ -41,3 +41,47 @@ export type FormState =
       }
     }
   | undefined
+
+export type MatchFormState =
+  | {
+      errors?: {
+        season?: string[]
+        round?: string[]
+        dateTime?: string[]
+        opponent?: string[]
+      }
+    }
+  | {
+      successMessage?: string[]
+    }
+  | undefined
+
+export type MatchResultsState =
+  | {
+      errors?: {
+        season?: string[]
+        round?: string[]
+        scored?: string[]
+        received?: string[]
+        starters?: string[]
+        bench?: string[]
+        goals?: string[]
+        assists?: string[]
+      }
+    }
+  | {
+      successMessage?: string[]
+    }
+  | undefined
+
+export type StandingsEditorState =
+  | {
+      errors?: {
+        season?: string[]
+        standings?: string[]
+      }
+    }
+  | {
+      successMessage?: string[]
+    }
+  | undefined

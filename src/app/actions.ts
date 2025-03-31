@@ -3,14 +3,22 @@
 import {
   createClient,
   createDatabaseClient,
+  createDatabaseClientWithSession,
   createSessionClient,
 } from '@/lib/appwrite/server'
 import { APIError } from '@/lib/errors'
 import { Database } from '@/types/database.types'
-import { FormState, MatchStats, PlayerStats } from '@/types/types'
+import {
+  FormState,
+  MatchFormState,
+  MatchResultsState,
+  MatchStats,
+  PlayerStats,
+  StandingsEditorState,
+} from '@/types/types'
 import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { AppwriteException, Query } from 'node-appwrite'
+import { notFound, redirect } from 'next/navigation'
+import { AppwriteException, ID, Query, Users } from 'node-appwrite'
 import { z } from 'zod'
 
 export const getCurrentSeason = async () => {
@@ -877,4 +885,384 @@ export const getSeasons = async () => {
   const seasons = data.documents as Database['Seasons'][]
 
   return seasons
+}
+
+export const getTeams = async () => {
+  const client = await createDatabaseClient()
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Teams',
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
+  }
+
+  const teams = data.documents as Database['Teams'][]
+
+  return teams
+}
+
+const createMatchSchema = z.object({
+  season: z.string().nonempty(),
+  round: z.number().int().gte(1),
+  dateTime: z.string().nonempty(),
+  opponent: z.string().nonempty(),
+})
+
+export const createMatch = async (
+  _currentState: MatchFormState,
+  formData: FormData,
+) => {
+  const validateFields = createMatchSchema.safeParse({
+    season: formData.get('season'),
+    round: Number(formData.get('round')),
+    dateTime: formData.get('dateTime'),
+    opponent: formData.get('opponent'),
+  })
+
+  if (!validateFields.success) {
+    return {
+      errors: validateFields.error.flatten().fieldErrors,
+    }
+  }
+
+  try {
+    const session = await createDatabaseClientWithSession()
+    await session.createDocument(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Matches',
+      ID.unique(),
+      {
+        season: validateFields.data.season,
+        round: validateFields.data.round,
+        datetime: validateFields.data.dateTime,
+        opponent: validateFields.data.opponent,
+        played: false,
+      },
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      return {
+        errors: {
+          season: [error.message],
+        },
+      }
+    } else {
+      return {
+        errors: {
+          season: ['An unknown error occurred while creating the match'],
+        },
+      }
+    }
+  }
+
+  return {
+    successMessage: ['Match created successfully'],
+  }
+}
+
+const matchResultSchema = z.object({
+  season: z.string().nonempty(),
+  round: z.number().int().gte(1),
+  scored: z.number().int().gte(0),
+  received: z.number().int().gte(0),
+  starters: z.array(z.number().int()).length(7),
+  bench: z.array(z.number().int()),
+  goals: z.array(
+    z.object({
+      player: z.number().int(),
+      amount: z.number().int().positive().gte(1),
+      type: z.union([
+        z.literal('InGame'),
+        z.literal('Penalty'),
+        z.literal('FreeKick'),
+      ]),
+    }),
+  ),
+  assists: z.array(
+    z.object({
+      player: z.number().int(),
+      amount: z.number().int().positive().gte(1),
+    }),
+  ),
+  yellowCards: z.array(
+    z.object({
+      player: z.number().int(),
+      amount: z.number().int().positive().gte(1),
+    }),
+  ),
+  redCards: z.array(z.number().int()),
+})
+
+export const addMatchResults = async (
+  _currentState: MatchResultsState,
+  formData: FormData,
+) => {
+  const validateFields = matchResultSchema.safeParse({
+    season: formData.get('season'),
+    round: Number(formData.get('round')),
+    scored: Number(formData.get('scored')),
+    received: Number(formData.get('received')),
+    starters: JSON.parse((formData.get('starters') as string) || '[]'),
+    bench: JSON.parse((formData.get('bench') as string) || '[]'),
+    goals: JSON.parse((formData.get('goals') as string) || '[]'),
+    assists: JSON.parse((formData.get('assists') as string) || '[]'),
+    yellowCards: JSON.parse((formData.get('yellowCards') as string) || '[]'),
+    redCards: JSON.parse((formData.getAll('redCards') as string[]).join(',')),
+  })
+
+  if (!validateFields.success) {
+    return {
+      errors: validateFields.error.flatten().fieldErrors,
+    }
+  }
+
+  try {
+    const session = await createDatabaseClientWithSession()
+
+    // Update match
+    const matchDocument = await session.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Matches',
+      [
+        Query.and([
+          Query.equal('season', validateFields.data.season),
+          Query.equal('round', validateFields.data.round),
+        ]),
+      ],
+    )
+
+    const match = matchDocument.documents[0] as Database['Matches']
+    await session.updateDocument(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Matches',
+      match.$id,
+      {
+        goals_scored: validateFields.data.scored,
+        goals_conceded: validateFields.data.received,
+        played: true,
+      },
+    )
+
+    // Add lineup
+    const starters = validateFields.data.starters
+    await Promise.all(
+      starters.map(async (player) => {
+        await session.createDocument(
+          process.env.APPWRITE_DATABASE_ID!,
+          'Lineups',
+          ID.unique(),
+          {
+            season: validateFields.data.season,
+            round: validateFields.data.round,
+            player: player,
+            position: starters.indexOf(player) + 1,
+          },
+        )
+      }),
+    )
+
+    const bench = validateFields.data.bench
+    await Promise.all(
+      bench.map(async (player) => {
+        await session.createDocument(
+          process.env.APPWRITE_DATABASE_ID!,
+          'Lineups',
+          ID.unique(),
+          {
+            season: validateFields.data.season,
+            round: validateFields.data.round,
+            player: player,
+            position: -1,
+          },
+        )
+      }),
+    )
+
+    // Add goals
+    const goals = validateFields.data.goals
+    await Promise.all(
+      goals.map(async (goal) => {
+        await session.createDocument(
+          process.env.APPWRITE_DATABASE_ID!,
+          'Goals',
+          ID.unique(),
+          {
+            season: validateFields.data.season,
+            round: validateFields.data.round,
+            player: goal.player,
+            amount: goal.amount,
+            goal_type: goal.type,
+          },
+        )
+      }),
+    )
+
+    // Add assists
+    const assists = validateFields.data.assists
+    await Promise.all(
+      assists.map(async (assist) => {
+        await session.createDocument(
+          process.env.APPWRITE_DATABASE_ID!,
+          'Assists',
+          ID.unique(),
+          {
+            season: validateFields.data.season,
+            round: validateFields.data.round,
+            player: assist.player,
+            amount: assist.amount,
+          },
+        )
+      }),
+    )
+
+    // Add yellow cards
+    const yellowCards = validateFields.data.yellowCards
+    await Promise.all(
+      yellowCards.map(async (yellowCard) => {
+        await session.createDocument(
+          process.env.APPWRITE_DATABASE_ID!,
+          'YellowCards',
+          ID.unique(),
+          {
+            season: validateFields.data.season,
+            round: validateFields.data.round,
+            player: yellowCard.player,
+            amount: yellowCard.amount,
+          },
+        )
+      }),
+    )
+
+    // Add red cards
+    const redCards = validateFields.data.redCards
+    await Promise.all(
+      redCards.map(async (redCard) => {
+        await session.createDocument(
+          process.env.APPWRITE_DATABASE_ID!,
+          'RedCards',
+          ID.unique(),
+          {
+            season: validateFields.data.season,
+            round: validateFields.data.round,
+            player: redCard,
+          },
+        )
+      }),
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      return {
+        errors: {
+          season: [error.message],
+        },
+      }
+    } else {
+      return {
+        errors: {
+          season: ['An unknown error occurred while adding the match results'],
+        },
+      }
+    }
+  }
+
+  return {
+    successMessage: 'Match results added successfully',
+  }
+}
+
+const standingsSchema = z.object({
+  season: z.string().nonempty(),
+  standings: z.array(
+    z.object({
+      id: z.string().nonempty(),
+      played: z.number().int().gte(0),
+      won: z.number().int().gte(0),
+      drawn: z.number().int().gte(0),
+      lost: z.number().int().gte(0),
+    }),
+  ),
+})
+
+export const updateStandings = async (
+  _currentState: StandingsEditorState,
+  formData: FormData,
+) => {
+  const validateFields = standingsSchema.safeParse({
+    season: formData.get('season'),
+    standings: JSON.parse((formData.get('standings') as string) || '[]'),
+  })
+
+  if (!validateFields.success) {
+    return {
+      errors: validateFields.error.flatten().fieldErrors,
+    }
+  }
+
+  try {
+    const session = await createDatabaseClientWithSession()
+
+    const documents = await session.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Standings',
+      [Query.equal('season', validateFields.data.season)],
+    )
+
+    const standings = documents.documents as Database['Standings'][]
+    await Promise.all(
+      validateFields.data.standings.map(async (team) => {
+        const teamDocument = standings.find((t) => t.team.$id === team.id)
+        if (teamDocument) {
+          await session.updateDocument(
+            process.env.APPWRITE_DATABASE_ID!,
+            'Standings',
+            teamDocument.$id,
+            {
+              played: team.played,
+              won: team.won,
+              drawn: team.drawn,
+              lost: team.lost,
+            },
+          )
+        }
+      }),
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      return {
+        errors: {
+          standings: [error.message],
+        },
+      }
+    } else {
+      return {
+        errors: {
+          standings: ['An unknown error occurred while updating the standings'],
+        },
+      }
+    }
+  }
+
+  return {
+    successMessage: 'Standings updated successfully',
+  }
+}
+
+export const redirectIfNotAdmin = async () => {
+  const databaseClient = await createDatabaseClient()
+  const { account } = await createSessionClient()
+  const user = await account.get()
+  const users = new Users(databaseClient.client)
+  const results = await users.listMemberships(user.$id)
+  if (
+    !results.memberships.some((membership) => membership.teamName === 'Admins')
+  ) {
+    notFound()
+  }
 }

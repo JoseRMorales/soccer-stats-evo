@@ -49,7 +49,9 @@ const GamePage = async ({
               </aside>
             </>
           ) : (
-            <LineupBuilderContainer season={season} />
+            <Suspense fallback={<SoccerFieldSkeleton />}>
+              <LineupBuilderContainer season={season} />
+            </Suspense>
           )}
         </main>
       </div>
