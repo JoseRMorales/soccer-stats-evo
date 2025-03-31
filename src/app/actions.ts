@@ -1255,14 +1255,150 @@ export const updateStandings = async (
 }
 
 export const redirectIfNotAdmin = async () => {
+  const isAdminUser = await isAdmin()
+
+  if (!isAdminUser) {
+    notFound()
+  }
+}
+
+export const isAdmin = async () => {
   const databaseClient = await createDatabaseClient()
   const { account } = await createSessionClient()
   const user = await account.get()
   const users = new Users(databaseClient.client)
   const results = await users.listMemberships(user.$id)
-  if (
-    !results.memberships.some((membership) => membership.teamName === 'Admins')
-  ) {
-    notFound()
+  return results.memberships.some(
+    (membership) => membership.teamName === 'Admins',
+  )
+}
+
+export const getTopAssists = async (season: string) => {
+  const client = await createDatabaseClient()
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Assists',
+      [Query.equal('season', season)],
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
   }
+
+  const assists = data.documents as Database['Assists'][]
+
+  const playerAssistsMap = new Map<number, number>()
+  assists.forEach((assist) => {
+    const currentAssists = playerAssistsMap.get(assist.player) || 0
+    playerAssistsMap.set(assist.player, currentAssists + assist.amount)
+  })
+
+  const assistStats = await Promise.all(
+    Array.from(playerAssistsMap.entries()).map(
+      async ([playerNumber, totalAssists]) => {
+        const playerInfo = await getPlayerInfo(season, playerNumber)
+        return {
+          player_name: playerInfo.name,
+          player_number: playerNumber,
+          assists: totalAssists,
+        }
+      },
+    ),
+  )
+
+  return assistStats.sort((a, b) => b.assists - a.assists)
+}
+
+export const getTopGoals = async (season: string) => {
+  const client = await createDatabaseClient()
+  let data
+  try {
+    data = await client.listDocuments(
+      process.env.APPWRITE_DATABASE_ID!,
+      'Goals',
+      [Query.equal('season', season)],
+    )
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      throw new APIError(error.message)
+    } else {
+      throw new APIError('An unknown error occurred while fetching the data')
+    }
+  }
+
+  const goals = data.documents as Database['Goals'][]
+
+  const playerGoalsMap = new Map<number, number>()
+  goals.forEach((goal) => {
+    const currentGoals = playerGoalsMap.get(goal.player) || 0
+    playerGoalsMap.set(goal.player, currentGoals + goal.amount)
+  })
+
+  const goalStats = await Promise.all(
+    Array.from(playerGoalsMap.entries()).map(
+      async ([playerNumber, totalGoals]) => {
+        const playerInfo = await getPlayerInfo(season, playerNumber)
+        return {
+          player_name: playerInfo.name,
+          player_number: playerNumber,
+          goals: totalGoals,
+        }
+      },
+    ),
+  )
+
+  return goalStats.sort((a, b) => b.goals - a.goals)
+}
+
+type PlayerGoalsAndAssists = {
+  player_name: string
+  player_number: number
+  goals: number
+  assists: number
+  amount: number
+}
+
+export const getTopGoalsAndAssists = async (
+  season: string,
+): Promise<PlayerGoalsAndAssists[]> => {
+  const goals = await getTopGoals(season)
+  const assists = await getTopAssists(season)
+
+  const playerStatsMap = new Map<number, PlayerGoalsAndAssists>()
+
+  goals.forEach((goal) => {
+    playerStatsMap.set(goal.player_number, {
+      player_name: goal.player_name,
+      player_number: goal.player_number,
+      goals: goal.goals,
+      assists: 0,
+      amount: goal.goals,
+    })
+  })
+
+  assists.forEach((assist) => {
+    if (playerStatsMap.has(assist.player_number)) {
+      const playerData = playerStatsMap.get(assist.player_number)!
+      playerData.assists = assist.assists
+      playerData.amount += assist.assists
+    } else {
+      playerStatsMap.set(assist.player_number, {
+        player_name: assist.player_name,
+        player_number: assist.player_number,
+        goals: 0,
+        assists: assist.assists,
+        amount: assist.assists,
+      })
+    }
+  })
+
+  const goalsAndAssists = Array.from(playerStatsMap.values())
+  const sortedData = goalsAndAssists.sort((a, b) => b.amount - a.amount)
+
+  return sortedData
 }

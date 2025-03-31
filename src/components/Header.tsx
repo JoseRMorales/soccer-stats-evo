@@ -9,10 +9,8 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu'
 import { IconLogout2 } from '@tabler/icons-react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'

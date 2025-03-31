@@ -1,3 +1,4 @@
+import NavigationFooter from '@/components/NavigationFooter'
 import './globals.css'
 
 import './styles.scss'
@@ -33,6 +34,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <NavigationFooter />
       </body>
     </html>
   )
