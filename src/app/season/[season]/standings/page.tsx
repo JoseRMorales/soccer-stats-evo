@@ -27,31 +27,35 @@ const Standings = async ({
       </Button>
       <main className="flex flex-col items-center justify-center h-screen p-4">
         <h1 className="text-4xl pb-10">Standings</h1>
-        <Table className="w-full max-w-3xl mx-auto text-md md:text-xl">
-          <TableCaption>Standings</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[200px]">Team</TableHead>
-              <TableHead className="text-right sm:pl-32">W</TableHead>
-              <TableHead className="text-right">D</TableHead>
-              <TableHead className="text-right">L</TableHead>
-              <TableHead className="text-right">Points</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {standings.map((team) => (
-              <TableRow key={team.name}>
-                <TableCell className="text-right font-bold">
-                  {team.name}
-                </TableCell>
-                <TableCell className="text-right">{team.won}</TableCell>
-                <TableCell className="text-right">{team.drawn}</TableCell>
-                <TableCell className="text-right">{team.lost}</TableCell>
-                <TableCell className="text-right">{team.points}</TableCell>
+        {standings?.length === 0 ? (
+          <h2 className="text-2xl">No standings available</h2>
+        ) : (
+          <Table className="w-full max-w-3xl mx-auto text-md md:text-xl">
+            <TableCaption>Standings</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px]">Team</TableHead>
+                <TableHead className="text-right sm:pl-32">W</TableHead>
+                <TableHead className="text-right">D</TableHead>
+                <TableHead className="text-right">L</TableHead>
+                <TableHead className="text-right">Points</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {standings.map((team) => (
+                <TableRow key={team.name}>
+                  <TableCell className="text-right font-bold">
+                    {team.name}
+                  </TableCell>
+                  <TableCell className="text-right">{team.won}</TableCell>
+                  <TableCell className="text-right">{team.drawn}</TableCell>
+                  <TableCell className="text-right">{team.lost}</TableCell>
+                  <TableCell className="text-right">{team.points}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </main>
     </>
   )
