@@ -1,3 +1,4 @@
+import { TabsContent } from '@radix-ui/react-tabs'
 import {
   getCurrentRound,
   getCurrentSeason,
@@ -10,7 +11,6 @@ import CreateMatchCard from '@/components/CreateMatchCard'
 import MatchResultsCard from '@/components/MatchResultsCard'
 import StandingsEditorCard from '@/components/StandingsEditorCard'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { TabsContent } from '@radix-ui/react-tabs'
 
 const AdminPage = async () => {
   await redirectIfNotAdmin()

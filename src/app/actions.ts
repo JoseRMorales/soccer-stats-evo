@@ -1,5 +1,9 @@
 'use server'
 
+import { cookies } from 'next/headers'
+import { notFound, redirect } from 'next/navigation'
+import { AppwriteException, ID, Query, Users } from 'node-appwrite'
+import { z } from 'zod'
 import {
   createClient,
   createDatabaseClient,
@@ -16,10 +20,6 @@ import {
   PlayerStats,
   StandingsEditorState,
 } from '@/types/types'
-import { cookies } from 'next/headers'
-import { notFound, redirect } from 'next/navigation'
-import { AppwriteException, ID, Query, Users } from 'node-appwrite'
-import { z } from 'zod'
 
 export const getCurrentSeason = async () => {
   const client = await createDatabaseClient()

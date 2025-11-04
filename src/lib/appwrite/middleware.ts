@@ -1,5 +1,5 @@
-import { createSessionClient } from '@/lib/appwrite/server'
 import { type NextRequest, NextResponse } from 'next/server'
+import { createSessionClient } from '@/lib/appwrite/server'
 
 export async function updateSession(request: NextRequest) {
   const response = NextResponse.next({

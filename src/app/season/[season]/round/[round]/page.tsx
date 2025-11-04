@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { isMatchPlayed } from '@/app/actions'
 import Bench from '@/components/Bench'
 import GameStats from '@/components/GameStats'
@@ -8,7 +9,6 @@ import BenchSkeleton from '@/components/skeletons/BenchSkeleton'
 import GameStatsSkeleton from '@/components/skeletons/GameStatsSkeleton'
 import HeaderSkeleton from '@/components/skeletons/HeaderSkeleton'
 import SoccerFieldSkeleton from '@/components/skeletons/SoccerFieldSkeleton'
-import { Suspense } from 'react'
 
 const GamePage = async ({
   params,

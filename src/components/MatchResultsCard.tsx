@@ -1,5 +1,8 @@
 'use client'
 
+import { Label } from '@radix-ui/react-label'
+import { IconMinus, IconPlus } from '@tabler/icons-react'
+import { useActionState, useState } from 'react'
 import { addMatchResults } from '@/app/actions'
 import SubmitButton from '@/components/SubmitButton'
 import { Button } from '@/components/ui/button'
@@ -15,10 +18,6 @@ import { Input } from '@/components/ui/input'
 import { MultiSelect } from '@/components/ui/multi-select'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { GoalType } from '@/types/database.types'
-import { Label } from '@radix-ui/react-label'
-import { IconPlus } from '@tabler/icons-react'
-import { IconMinus } from '@tabler/icons-react'
-import { useActionState, useState } from 'react'
 
 const initialState = {
   errors: {

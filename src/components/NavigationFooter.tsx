@@ -1,5 +1,5 @@
-import { getCurrentRound } from '@/app/actions'
 import Link from 'next/link'
+import { getCurrentRound } from '@/app/actions'
 
 const NavigationFooter = async () => {
   const { season } = await getCurrentRound()

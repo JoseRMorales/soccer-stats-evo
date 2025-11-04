@@ -1,5 +1,5 @@
-import NavigationFooter from '@/components/NavigationFooter'
 import React from 'react'
+import NavigationFooter from '@/components/NavigationFooter'
 
 const SeasonLayout = ({
   children,
