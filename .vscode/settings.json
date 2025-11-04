@@ -13,5 +13,9 @@
   "[json]": {
     "files.insertFinalNewline": true,
     "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[jsonc]": {
+    "files.insertFinalNewline": true,
+    "editor.defaultFormatter": "biomejs.biome"
   }
 }
