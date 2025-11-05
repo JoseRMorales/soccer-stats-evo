@@ -1,5 +1,6 @@
 'use client'
 
+import { Check, ChevronsUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -15,7 +16,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
-import { Check, ChevronsUpDown } from 'lucide-react'
 
 type ComboboxOption = {
   value: string

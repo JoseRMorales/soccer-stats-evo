@@ -45,3 +45,4 @@ next-env.d.ts
 data.sql
 roles.sql
 certificates
+appwrite.config.json

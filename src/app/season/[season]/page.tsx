@@ -1,6 +1,6 @@
+import { redirect } from 'next/navigation'
 import { getCurrentSeason, goToCurrentRound } from '@/app/actions'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { redirect } from 'next/navigation'
 
 const SeasonPage = async ({
   params,

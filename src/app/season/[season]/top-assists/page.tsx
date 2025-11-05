@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getCurrentRound, getTopAssists } from '@/app/actions'
 import { Button } from '@/components/ui/button'
 import {
@@ -9,7 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import Link from 'next/link'
 
 const TopAssists = async ({
   params,

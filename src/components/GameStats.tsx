@@ -1,13 +1,12 @@
-import React from 'react'
-
-import { getMatchDate, getMatchStats, getMatchTeams } from '@/app/actions'
-import { APIError } from '@/lib/errors'
 import {
   IconBallFootball,
   IconCardsFilled,
   IconShoe,
 } from '@tabler/icons-react'
 import { redirect } from 'next/navigation'
+import React from 'react'
+import { getMatchDate, getMatchStats, getMatchTeams } from '@/app/actions'
+import { APIError } from '@/lib/errors'
 
 const GameStats = async ({
   season,

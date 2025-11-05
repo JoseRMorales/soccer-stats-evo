@@ -1,5 +1,7 @@
 'use client'
 
+import { IconMinus, IconPlus } from '@tabler/icons-react'
+import { useActionState, useState } from 'react'
 import { updateStandings } from '@/app/actions'
 import SubmitButton from '@/components/SubmitButton'
 import { Button } from '@/components/ui/button'
@@ -14,8 +16,6 @@ import Combobox from '@/components/ui/combo-box'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { IconMinus, IconPlus } from '@tabler/icons-react'
-import { useActionState, useState } from 'react'
 
 const initialState = {
   errors: {

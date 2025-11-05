@@ -1,5 +1,7 @@
 'use client'
 
+import { Check } from 'lucide-react'
+import { useState } from 'react'
 import {
   Command,
   CommandEmpty,
@@ -14,8 +16,6 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { LineupBuilderPlayer } from '@/types/types'
-import { Check } from 'lucide-react'
-import { useState } from 'react'
 
 const PlayerCard = ({
   x = 0,

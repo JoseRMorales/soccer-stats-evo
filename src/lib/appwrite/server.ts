@@ -1,6 +1,6 @@
 'use server'
 import { cookies } from 'next/headers'
-import { Account, Client, Databases } from 'node-appwrite'
+import { Account, Client, Databases, TablesDB } from 'node-appwrite'
 
 export async function createSessionClient() {
   const client = new Client()
@@ -42,11 +42,11 @@ export async function createDatabaseClient() {
     .setProject(process.env.APPWRITE_PROJECT_ID!)
     .setKey(process.env.APPWRITE_KEY!)
 
-  return new Databases(client)
+  return new TablesDB(client)
 }
 
 export async function createDatabaseClientWithSession() {
   const { account } = await createSessionClient()
 
-  return new Databases(account.client)
+  return new TablesDB(account.client)
 }

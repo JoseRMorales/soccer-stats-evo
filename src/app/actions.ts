@@ -1,5 +1,9 @@
 'use server'
 
+import { cookies } from 'next/headers'
+import { notFound, redirect } from 'next/navigation'
+import { AppwriteException, ID, Query, Users } from 'node-appwrite'
+import { z } from 'zod'
 import {
   createClient,
   createDatabaseClient,
@@ -7,7 +11,19 @@ import {
   createSessionClient,
 } from '@/lib/appwrite/server'
 import { APIError } from '@/lib/errors'
-import { Database } from '@/types/database.types'
+import {
+  Assists,
+  Goals,
+  Lineups,
+  Matches,
+  PenaltiesAgainst,
+  Players,
+  RedCards,
+  Seasons,
+  Standings,
+  Teams,
+  YellowCards,
+} from '@/types/appwrite'
 import {
   FormState,
   MatchFormState,
@@ -16,20 +32,17 @@ import {
   PlayerStats,
   StandingsEditorState,
 } from '@/types/types'
-import { cookies } from 'next/headers'
-import { notFound, redirect } from 'next/navigation'
-import { AppwriteException, ID, Query, Users } from 'node-appwrite'
-import { z } from 'zod'
 
 export const getCurrentSeason = async () => {
   const client = await createDatabaseClient()
 
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Seasons',
-    )
+    const rowList = await client.listRows<Seasons>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Seasons',
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -38,9 +51,7 @@ export const getCurrentSeason = async () => {
     }
   }
 
-  const seasons = data.documents as Database['Seasons'][]
-  const orderedSeasons = seasons.sort((a, b) => b.order - a.order)
-
+  const orderedSeasons = data.sort((a, b) => b.order - a.order)
   return orderedSeasons[0].id
 }
 
@@ -50,11 +61,12 @@ export const getCurrentRound = async () => {
   const client = await createDatabaseClient()
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Matches',
-      [Query.equal('season', season)],
-    )
+    const rowList = await client.listRows<Matches>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Matches',
+      queries: [Query.equal('season', season)],
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -63,7 +75,7 @@ export const getCurrentRound = async () => {
     }
   }
 
-  const reversedMatches = data.documents.reverse() as Database['Matches'][]
+  const reversedMatches = data.reverse()
 
   // Find the first match that has already been played
   const match = reversedMatches?.find((match) => {
@@ -88,11 +100,12 @@ export const getMatchTeams = async (season: string, round: number) => {
   const client = await createDatabaseClient()
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Teams',
-      [Query.equal('owner', true), Query.limit(1)],
-    )
+    const rowList = await client.listRows<Teams>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Teams',
+      queries: [Query.equal('owner', true), Query.limit(1)],
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -101,20 +114,20 @@ export const getMatchTeams = async (season: string, round: number) => {
     }
   }
 
-  const teams = data.documents as Database['Teams'][]
-  const ownerTeam = teams[0].name
+  const ownerTeam = data[0].name
 
   let matchesData
   try {
-    matchesData = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Matches',
-      [
+    const rowList = await client.listRows<Matches>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Matches',
+      queries: [
         Query.equal('season', season),
         Query.equal('round', round),
         Query.limit(1),
       ],
-    )
+    })
+    matchesData = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -123,7 +136,7 @@ export const getMatchTeams = async (season: string, round: number) => {
     }
   }
 
-  const match = matchesData.documents[0] as Database['Matches']
+  const match = matchesData[0]
 
   const opponentTeam = match.opponent.name
   const scoredGoals = match.goals_scored
@@ -142,11 +155,12 @@ export const getMatchScorers = async (season: string, round: number) => {
   let data
 
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Goals',
-      [Query.equal('season', season), Query.equal('round', round)],
-    )
+    const rowList = await client.listRows<Goals>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Goals',
+      queries: [Query.equal('season', season), Query.equal('round', round)],
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -155,7 +169,7 @@ export const getMatchScorers = async (season: string, round: number) => {
     }
   }
 
-  const goals = data.documents as Database['Goals'][]
+  const goals = data
   const scorers = await Promise.all(
     goals.map(async (goal) => {
       const playerInfo = await getPlayerInfo(season, goal.player)
@@ -174,11 +188,12 @@ export const getMatchAssists = async (season: string, round: number) => {
   let data
 
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Assists',
-      [Query.equal('season', season), Query.equal('round', round)],
-    )
+    const rowList = await client.listRows<Assists>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Assists',
+      queries: [Query.equal('season', season), Query.equal('round', round)],
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -187,7 +202,7 @@ export const getMatchAssists = async (season: string, round: number) => {
     }
   }
 
-  const assists = data.documents as Database['Assists'][]
+  const assists = data
   const assisters = await Promise.all(
     assists.map(async (assist) => {
       const playerInfo = await getPlayerInfo(season, assist.player)
@@ -206,11 +221,12 @@ export const getMatchYellowCards = async (season: string, round: number) => {
   let data
 
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'YellowCards',
-      [Query.equal('season', season), Query.equal('round', round)],
-    )
+    const rowList = await client.listRows<YellowCards>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'YellowCards',
+      queries: [Query.equal('season', season), Query.equal('round', round)],
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -219,7 +235,7 @@ export const getMatchYellowCards = async (season: string, round: number) => {
     }
   }
 
-  const yellowCards = data.documents as Database['YellowCards'][]
+  const yellowCards = data
   const yellowCardPlayers = await Promise.all(
     yellowCards.map(async (yellowCard) => {
       const playerInfo = await getPlayerInfo(season, yellowCard.player)
@@ -238,11 +254,12 @@ export const getMatchRedCards = async (season: string, round: number) => {
   let data
 
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'RedCards',
-      [Query.equal('season', season), Query.equal('round', round)],
-    )
+    const rowList = await client.listRows<RedCards>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'RedCards',
+      queries: [Query.equal('season', season), Query.equal('round', round)],
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -251,7 +268,7 @@ export const getMatchRedCards = async (season: string, round: number) => {
     }
   }
 
-  const redCards = data.documents as Database['RedCards'][]
+  const redCards = data
   const redCardPlayers = await Promise.all(
     redCards.map(async (redCard) => {
       const playerInfo = await getPlayerInfo(season, redCard.player)
@@ -269,16 +286,17 @@ export const getPlayerInfo = async (season: string, playerNumber: number) => {
 
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Players',
-      [
+    const rowList = await client.listRows<Players>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Players',
+      queries: [
         Query.and([
           Query.equal('season', season),
           Query.equal('number', playerNumber),
         ]),
       ],
-    )
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -287,22 +305,23 @@ export const getPlayerInfo = async (season: string, playerNumber: number) => {
     }
   }
 
-  return data.documents[0] as Database['Players']
+  return data[0]
 }
 
 export const getNextRound = async (season: string, round: number) => {
   const client = await createDatabaseClient()
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Matches',
-      [
+    const rowList = await client.listRows<Matches>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Matches',
+      queries: [
         Query.equal('season', season),
         Query.equal('round', round + 1),
         Query.limit(1),
       ],
-    )
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -311,7 +330,7 @@ export const getNextRound = async (season: string, round: number) => {
     }
   }
 
-  return data.documents[0]?.round
+  return data[0]?.round
 }
 
 export const getPlayedMatches = async (
@@ -322,16 +341,17 @@ export const getPlayedMatches = async (
   let playedMatchesData
 
   try {
-    playedMatchesData = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Lineups',
-      [
+    const rowList = await client.listRows<Lineups>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Lineups',
+      queries: [
         Query.and([
           Query.equal('season', season),
           Query.equal('player', playerNumber),
         ]),
       ],
-    )
+    })
+    playedMatchesData = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -339,7 +359,7 @@ export const getPlayedMatches = async (
       throw new APIError('An unknown error occurred while fetching the data')
     }
   }
-  return playedMatchesData.documents.length
+  return playedMatchesData.length
 }
 
 export const getGoalsNumber = async (season: string, playerNumber: number) => {
@@ -347,16 +367,17 @@ export const getGoalsNumber = async (season: string, playerNumber: number) => {
 
   let totalGoalsData
   try {
-    totalGoalsData = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Goals',
-      [
+    const rowList = await client.listRows<Goals>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Goals',
+      queries: [
         Query.and([
           Query.equal('season', season),
           Query.equal('player', playerNumber),
         ]),
       ],
-    )
+    })
+    totalGoalsData = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -365,8 +386,8 @@ export const getGoalsNumber = async (season: string, playerNumber: number) => {
     }
   }
 
-  const totalGoals = totalGoalsData.documents.reduce(
-    (acc, goal) => acc + goal.amount,
+  const totalGoals = totalGoalsData.reduce(
+    (acc: number, goal: Goals) => acc + goal.amount,
     0,
   )
   return totalGoals
@@ -380,16 +401,17 @@ export const getAssistsNumber = async (
 
   let totalAssistsData
   try {
-    totalAssistsData = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Assists',
-      [
+    const rowList = await client.listRows<Assists>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Assists',
+      queries: [
         Query.and([
           Query.equal('season', season),
           Query.equal('player', playerNumber),
         ]),
       ],
-    )
+    })
+    totalAssistsData = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -398,8 +420,8 @@ export const getAssistsNumber = async (
     }
   }
 
-  const totalAssists = totalAssistsData.documents.reduce(
-    (acc, assist) => acc + assist.amount,
+  const totalAssists = totalAssistsData.reduce(
+    (acc: number, assist: Assists) => acc + assist.amount,
     0,
   )
 
@@ -414,16 +436,17 @@ export const getYellowCardsNumber = async (
 
   let totalYellowCardsData
   try {
-    totalYellowCardsData = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'YellowCards',
-      [
+    const rowList = await client.listRows<YellowCards>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'YellowCards',
+      queries: [
         Query.and([
           Query.equal('season', season),
           Query.equal('player', playerNumber),
         ]),
       ],
-    )
+    })
+    totalYellowCardsData = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -432,8 +455,8 @@ export const getYellowCardsNumber = async (
     }
   }
 
-  const totalYellowCards = totalYellowCardsData.documents.reduce(
-    (acc, yellowCard) => acc + yellowCard.amount,
+  const totalYellowCards = totalYellowCardsData.reduce(
+    (acc: number, yellowCard: YellowCards) => acc + yellowCard.amount,
     0,
   )
 
@@ -448,16 +471,17 @@ export const getRedCardsNumber = async (
 
   let redCardsData
   try {
-    redCardsData = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'RedCards',
-      [
+    const rowList = await client.listRows<RedCards>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'RedCards',
+      queries: [
         Query.and([
           Query.equal('season', season),
           Query.equal('player', playerNumber),
         ]),
       ],
-    )
+    })
+    redCardsData = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -466,9 +490,7 @@ export const getRedCardsNumber = async (
     }
   }
 
-  const redCards = redCardsData.documents as Database['RedCards'][]
-
-  return redCards.length
+  return redCardsData.length
 }
 
 export const getPenaltiesSaved = async (
@@ -478,16 +500,17 @@ export const getPenaltiesSaved = async (
   const client = await createDatabaseClient()
   let totalPenaltiesSavedData
   try {
-    totalPenaltiesSavedData = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'PenaltiesAgainst',
-      [
+    const rowList = await client.listRows<PenaltiesAgainst>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'PenaltiesAgainst',
+      queries: [
         Query.and([
           Query.equal('season', season),
           Query.equal('player', playerNumber),
         ]),
       ],
-    )
+    })
+    totalPenaltiesSavedData = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -496,13 +519,13 @@ export const getPenaltiesSaved = async (
     }
   }
 
-  const totalPenaltiesSaved = totalPenaltiesSavedData.documents.reduce(
-    (acc, penalty) => acc + penalty.amount,
+  const totalPenaltiesSaved = totalPenaltiesSavedData.reduce(
+    (acc: number, penalty: PenaltiesAgainst) => acc + penalty.amount,
     0,
   )
 
-  const totalPenalties = totalPenaltiesSavedData.documents.reduce(
-    (acc, penalty) => acc + penalty.total,
+  const totalPenalties = totalPenaltiesSavedData.reduce(
+    (acc: number, penalty: PenaltiesAgainst) => acc + penalty.saved,
     0,
   )
 
@@ -545,11 +568,12 @@ export const getMatchStats = async (
   const client = await createDatabaseClient()
   let goalsData
   try {
-    goalsData = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Goals',
-      [Query.equal('season', season), Query.equal('round', round)],
-    )
+    const rowList = await client.listRows<Goals>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Goals',
+      queries: [Query.equal('season', season), Query.equal('round', round)],
+    })
+    goalsData = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -558,7 +582,7 @@ export const getMatchStats = async (
     }
   }
 
-  const goals = goalsData.documents as Database['Goals'][]
+  const goals = goalsData
   const goalStats = goals.map(async (goal) => {
     const playerInfo = await getPlayerInfo(season, goal.player)
     return {
@@ -570,11 +594,12 @@ export const getMatchStats = async (
 
   let assistsData
   try {
-    assistsData = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Assists',
-      [Query.equal('season', season), Query.equal('round', round)],
-    )
+    const rowList = await client.listRows<Assists>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Assists',
+      queries: [Query.equal('season', season), Query.equal('round', round)],
+    })
+    assistsData = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -583,7 +608,7 @@ export const getMatchStats = async (
     }
   }
 
-  const assists = assistsData.documents as Database['Assists'][]
+  const assists = assistsData
   const assistStats = assists.map(async (assist) => {
     const playerInfo = await getPlayerInfo(season, assist.player)
     return {
@@ -595,11 +620,12 @@ export const getMatchStats = async (
 
   let yellowCardsData
   try {
-    yellowCardsData = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'YellowCards',
-      [Query.equal('season', season), Query.equal('round', round)],
-    )
+    const rowList = await client.listRows<YellowCards>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'YellowCards',
+      queries: [Query.equal('season', season), Query.equal('round', round)],
+    })
+    yellowCardsData = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -608,7 +634,7 @@ export const getMatchStats = async (
     }
   }
 
-  const yellowCards = yellowCardsData.documents as Database['YellowCards'][]
+  const yellowCards = yellowCardsData
   const yellowCardStats = yellowCards.map(async (yellowCard) => {
     const playerInfo = await getPlayerInfo(season, yellowCard.player)
     return {
@@ -621,11 +647,12 @@ export const getMatchStats = async (
   let redCardsData
 
   try {
-    redCardsData = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'RedCards',
-      [Query.equal('season', season), Query.equal('round', round)],
-    )
+    const rowList = await client.listRows<RedCards>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'RedCards',
+      queries: [Query.equal('season', season), Query.equal('round', round)],
+    })
+    redCardsData = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -634,7 +661,7 @@ export const getMatchStats = async (
     }
   }
 
-  const redCards = redCardsData.documents as Database['RedCards'][]
+  const redCards = redCardsData
   const redCardStats = redCards.map(async (redCard) => {
     const playerInfo = await getPlayerInfo(season, redCard.player)
     return {
@@ -655,11 +682,11 @@ export const getStarters = async (season: string, round: number) => {
   const client = await createDatabaseClient()
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Lineups',
-      [Query.equal('season', season), Query.equal('round', round)],
-    )
+    data = await client.listRows<Lineups>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Lineups',
+      queries: [Query.equal('season', season), Query.equal('round', round)],
+    })
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -668,7 +695,7 @@ export const getStarters = async (season: string, round: number) => {
     }
   }
 
-  const lineupData = data.documents as Database['Lineups'][]
+  const lineupData = data.rows
   const starters = lineupData.filter((player) => player.position !== -1)
 
   return starters
@@ -678,11 +705,12 @@ export const getBench = async (season: string, round: number) => {
   const client = await createDatabaseClient()
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Lineups',
-      [Query.equal('season', season), Query.equal('round', round)],
-    )
+    const rowList = await client.listRows<Lineups>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Lineups',
+      queries: [Query.equal('season', season), Query.equal('round', round)],
+    })
+    data = rowList
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -690,8 +718,7 @@ export const getBench = async (season: string, round: number) => {
       throw new APIError('An unknown error occurred while fetching the data')
     }
   }
-
-  const lineupData = data.documents as Database['Lineups'][]
+  const lineupData = data.rows
   const bench = lineupData.filter((player) => player.position === -1)
 
   return bench
@@ -702,11 +729,14 @@ export const getMatchDate = async (season: string, round: number) => {
   let data
 
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Matches',
-      [Query.and([Query.equal('season', season), Query.equal('round', round)])],
-    )
+    const rowList = await client.listRows<Matches>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Matches',
+      queries: [
+        Query.and([Query.equal('season', season), Query.equal('round', round)]),
+      ],
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -715,9 +745,11 @@ export const getMatchDate = async (season: string, round: number) => {
     }
   }
 
-  const match = data.documents[0] as Database['Matches']
+  const match = data[0]
   const datetime = match.datetime
-
+  if (!datetime) {
+    throw new APIError('Match datetime is missing')
+  }
   return new Date(datetime)
 }
 
@@ -725,11 +757,12 @@ export const getPlayers = async (season: string) => {
   const client = await createDatabaseClient()
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Players',
-      [Query.equal('season', season)],
-    )
+    const rowList = await client.listRows<Players>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Players',
+      queries: [Query.equal('season', season)],
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -738,9 +771,7 @@ export const getPlayers = async (season: string) => {
     }
   }
 
-  const players = data.documents as Database['Players'][]
-
-  return players
+  return data
 }
 
 export const isMatchPlayed = async (season: string, round: number) => {
@@ -748,11 +779,14 @@ export const isMatchPlayed = async (season: string, round: number) => {
 
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Matches',
-      [Query.and([Query.equal('season', season), Query.equal('round', round)])],
-    )
+    const rowList = await client.listRows<Matches>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Matches',
+      queries: [
+        Query.and([Query.equal('season', season), Query.equal('round', round)]),
+      ],
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -761,7 +795,7 @@ export const isMatchPlayed = async (season: string, round: number) => {
     }
   }
 
-  const match = data.documents[0] as Database['Matches']
+  const match = data[0]
 
   return match.played
 }
@@ -770,11 +804,12 @@ export const getStandings = async (season: string) => {
   const client = await createDatabaseClient()
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Standings',
-      [Query.equal('season', season)],
-    )
+    const rowList = await client.listRows<Standings>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Standings',
+      queries: [Query.equal('season', season), Query.select(['*', 'team.*'])],
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -782,19 +817,16 @@ export const getStandings = async (season: string) => {
       throw new APIError('An unknown error occurred while fetching the data')
     }
   }
-  const teams = data.documents as Database['Standings'][]
-
-  const standings = teams
-    .map((team) => {
-      const points = team.won * 3 + team.drawn * 1
+  const standings = data
+    .map((standing) => {
+      const points = standing.won * 3 + standing.drawn * 1
       return {
-        ...team,
+        ...standing,
         points,
-        name: team.team.name,
+        name: standing.team.name,
       }
     })
     .sort((a, b) => b.points - a.points)
-
   return standings
 }
 
@@ -870,10 +902,10 @@ export const getSeasons = async () => {
   const client = await createDatabaseClient()
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Seasons',
-    )
+    data = await client.listRows<Seasons>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Seasons',
+    })
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -882,7 +914,7 @@ export const getSeasons = async () => {
     }
   }
 
-  const seasons = data.documents as Database['Seasons'][]
+  const seasons = data.rows
 
   return seasons
 }
@@ -891,10 +923,11 @@ export const getTeams = async () => {
   const client = await createDatabaseClient()
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Teams',
-    )
+    const rowList = await client.listRows<Teams>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Teams',
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -903,9 +936,7 @@ export const getTeams = async () => {
     }
   }
 
-  const teams = data.documents as Database['Teams'][]
-
-  return teams
+  return data
 }
 
 const createMatchSchema = z.object({
@@ -934,18 +965,18 @@ export const createMatch = async (
 
   try {
     const session = await createDatabaseClientWithSession()
-    await session.createDocument(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Matches',
-      ID.unique(),
-      {
+    await session.createRow({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Matches',
+      rowId: ID.unique(),
+      data: {
         season: validateFields.data.season,
         round: validateFields.data.round,
         datetime: validateFields.data.dateTime,
         opponent: validateFields.data.opponent,
         played: false,
       },
-    )
+    })
   } catch (error) {
     if (error instanceof AppwriteException) {
       return {
@@ -1027,61 +1058,60 @@ export const addMatchResults = async (
     const session = await createDatabaseClientWithSession()
 
     // Update match
-    const matchDocument = await session.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Matches',
-      [
+    const matchRowList = await session.listRows<Matches>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Matches',
+      queries: [
         Query.and([
           Query.equal('season', validateFields.data.season),
           Query.equal('round', validateFields.data.round),
         ]),
       ],
-    )
-
-    const match = matchDocument.documents[0] as Database['Matches']
-    await session.updateDocument(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Matches',
-      match.$id,
-      {
+    })
+    const match = matchRowList.rows[0]
+    await session.updateRow({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Matches',
+      rowId: match.$id,
+      data: {
         goals_scored: validateFields.data.scored,
         goals_conceded: validateFields.data.received,
         played: true,
       },
-    )
+    })
 
     // Add lineup
     const starters = validateFields.data.starters
     await Promise.all(
       starters.map(async (player) => {
-        await session.createDocument(
-          process.env.APPWRITE_DATABASE_ID!,
-          'Lineups',
-          ID.unique(),
-          {
+        await session.createRow({
+          databaseId: process.env.APPWRITE_DATABASE_ID!,
+          tableId: 'Lineups',
+          rowId: ID.unique(),
+          data: {
             season: validateFields.data.season,
             round: validateFields.data.round,
             player: player,
             position: starters.indexOf(player) + 1,
           },
-        )
+        })
       }),
     )
 
     const bench = validateFields.data.bench
     await Promise.all(
       bench.map(async (player) => {
-        await session.createDocument(
-          process.env.APPWRITE_DATABASE_ID!,
-          'Lineups',
-          ID.unique(),
-          {
+        await session.createRow({
+          databaseId: process.env.APPWRITE_DATABASE_ID!,
+          tableId: 'Lineups',
+          rowId: ID.unique(),
+          data: {
             season: validateFields.data.season,
             round: validateFields.data.round,
             player: player,
             position: -1,
           },
-        )
+        })
       }),
     )
 
@@ -1089,18 +1119,18 @@ export const addMatchResults = async (
     const goals = validateFields.data.goals
     await Promise.all(
       goals.map(async (goal) => {
-        await session.createDocument(
-          process.env.APPWRITE_DATABASE_ID!,
-          'Goals',
-          ID.unique(),
-          {
+        await session.createRow({
+          databaseId: process.env.APPWRITE_DATABASE_ID!,
+          tableId: 'Goals',
+          rowId: ID.unique(),
+          data: {
             season: validateFields.data.season,
             round: validateFields.data.round,
             player: goal.player,
             amount: goal.amount,
             goal_type: goal.type,
           },
-        )
+        })
       }),
     )
 
@@ -1108,17 +1138,17 @@ export const addMatchResults = async (
     const assists = validateFields.data.assists
     await Promise.all(
       assists.map(async (assist) => {
-        await session.createDocument(
-          process.env.APPWRITE_DATABASE_ID!,
-          'Assists',
-          ID.unique(),
-          {
+        await session.createRow({
+          databaseId: process.env.APPWRITE_DATABASE_ID!,
+          tableId: 'Assists',
+          rowId: ID.unique(),
+          data: {
             season: validateFields.data.season,
             round: validateFields.data.round,
             player: assist.player,
             amount: assist.amount,
           },
-        )
+        })
       }),
     )
 
@@ -1126,17 +1156,17 @@ export const addMatchResults = async (
     const yellowCards = validateFields.data.yellowCards
     await Promise.all(
       yellowCards.map(async (yellowCard) => {
-        await session.createDocument(
-          process.env.APPWRITE_DATABASE_ID!,
-          'YellowCards',
-          ID.unique(),
-          {
+        await session.createRow({
+          databaseId: process.env.APPWRITE_DATABASE_ID!,
+          tableId: 'YellowCards',
+          rowId: ID.unique(),
+          data: {
             season: validateFields.data.season,
             round: validateFields.data.round,
             player: yellowCard.player,
             amount: yellowCard.amount,
           },
-        )
+        })
       }),
     )
 
@@ -1144,16 +1174,16 @@ export const addMatchResults = async (
     const redCards = validateFields.data.redCards
     await Promise.all(
       redCards.map(async (redCard) => {
-        await session.createDocument(
-          process.env.APPWRITE_DATABASE_ID!,
-          'RedCards',
-          ID.unique(),
-          {
+        await session.createRow({
+          databaseId: process.env.APPWRITE_DATABASE_ID!,
+          tableId: 'RedCards',
+          rowId: ID.unique(),
+          data: {
             season: validateFields.data.season,
             round: validateFields.data.round,
             player: redCard,
           },
-        )
+        })
       }),
     )
   } catch (error) {
@@ -1208,28 +1238,29 @@ export const updateStandings = async (
   try {
     const session = await createDatabaseClientWithSession()
 
-    const documents = await session.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Standings',
-      [Query.equal('season', validateFields.data.season)],
-    )
-
-    const standings = documents.documents as Database['Standings'][]
+    const rowList = await session.listRows<Standings>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Standings',
+      queries: [Query.equal('season', validateFields.data.season)],
+    })
+    const standings = rowList.rows
     await Promise.all(
       validateFields.data.standings.map(async (team) => {
-        const teamDocument = standings.find((t) => t.team.$id === team.id)
+        const teamDocument = standings.find(
+          (t: Standings) => t.team.$id === team.id,
+        )
         if (teamDocument) {
-          await session.updateDocument(
-            process.env.APPWRITE_DATABASE_ID!,
-            'Standings',
-            teamDocument.$id,
-            {
+          await session.updateRow({
+            databaseId: process.env.APPWRITE_DATABASE_ID!,
+            tableId: 'Standings',
+            rowId: teamDocument.$id,
+            data: {
               played: team.played,
               won: team.won,
               drawn: team.drawn,
               lost: team.lost,
             },
-          )
+          })
         }
       }),
     )
@@ -1277,11 +1308,12 @@ export const getTopAssists = async (season: string) => {
   const client = await createDatabaseClient()
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Assists',
-      [Query.equal('season', season)],
-    )
+    const rowList = await client.listRows<Assists>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Assists',
+      queries: [Query.equal('season', season)],
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -1290,7 +1322,7 @@ export const getTopAssists = async (season: string) => {
     }
   }
 
-  const assists = data.documents as Database['Assists'][]
+  const assists = data
 
   const playerAssistsMap = new Map<number, number>()
   assists.forEach((assist) => {
@@ -1318,11 +1350,12 @@ export const getTopGoals = async (season: string) => {
   const client = await createDatabaseClient()
   let data
   try {
-    data = await client.listDocuments(
-      process.env.APPWRITE_DATABASE_ID!,
-      'Goals',
-      [Query.equal('season', season)],
-    )
+    const rowList = await client.listRows<Goals>({
+      databaseId: process.env.APPWRITE_DATABASE_ID!,
+      tableId: 'Goals',
+      queries: [Query.equal('season', season)],
+    })
+    data = rowList.rows
   } catch (error) {
     if (error instanceof AppwriteException) {
       throw new APIError(error.message)
@@ -1331,7 +1364,7 @@ export const getTopGoals = async (season: string) => {
     }
   }
 
-  const goals = data.documents as Database['Goals'][]
+  const goals = data
 
   const playerGoalsMap = new Map<number, number>()
   goals.forEach((goal) => {

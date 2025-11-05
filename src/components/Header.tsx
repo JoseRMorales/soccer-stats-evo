@@ -1,3 +1,6 @@
+import { IconLogout2 } from '@tabler/icons-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
 import {
   getCurrentRound,
   getNextRound,
@@ -12,9 +15,6 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu'
-import { IconLogout2 } from '@tabler/icons-react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import Link from 'next/link'
 
 const Header = async ({ season, round }: { season: string; round: number }) => {
   const previousRound = round > 1 ? round - 1 : null
